@@ -16,7 +16,9 @@ interface IHedgehogCore {
         uint256 hedgeReserve; // HEDGE locked in the spoke
         uint256 slope; // bonding curve slope m (WAD)
         bool graduated; // true if reserve >= graduationThreshold
+        bool sunset; // true if spoke has been sunset (recycled)
         uint64 createdAtBlock; // block number when spoke was created
+        uint64 lastSupplyChangeBlock; // last block where supply changed
         address creator;
     }
 
@@ -74,6 +76,8 @@ interface IHedgehogCore {
 
     event MinSpokeSupplyUpdated(uint256 oldMin, uint256 newMin);
 
+    event SpokeSunset(uint256 indexed spokeId, uint256 reserveReleased);
+
     // --- Errors ---
 
     error InsufficientToll();
@@ -89,6 +93,9 @@ interface IHedgehogCore {
     error InsufficientAllowance();
     error InsufficientSpokeBalance();
     error BelowMinSpokeSupply();
+    error SpokeAlreadySunset();
+    error SpokeNotAtFloor();
+    error SunsetTooEarly();
 
     // --- Core Functions ---
 
@@ -112,6 +119,8 @@ interface IHedgehogCore {
     function hubBuyHedge(uint256 minHedgeOut) external payable;
 
     function hubSellHedge(uint256 hedgeAmount, uint256 minSOut) external;
+
+    function sunsetSpoke(uint256 spokeId) external;
 
     // --- View Functions ---
 

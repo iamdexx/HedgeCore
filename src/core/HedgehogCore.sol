@@ -28,6 +28,7 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
     uint256 public constant MAX_FEE_BPS = 500; // 5% max fee
     uint256 public constant GRADUATION_THRESHOLD = 50_000e18; // 50k HEDGE
     uint256 public constant EOA_PROTECTION_BLOCKS = 100;
+    uint256 public constant SUNSET_THRESHOLD = 2_592_000; // ~30 days at 1s blocks
     uint256 public constant EQUITY_RATE_PRECISION = 1e6; // 0.1% = 1000
 
     // -------------------------------------------------------------------------
@@ -58,7 +59,9 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
         uint256 hedgeReserve; // HEDGE locked backing this spoke
         uint256 slope; // bonding curve slope m (WAD)
         bool graduated;
+        bool sunset; // true if spoke has been sunset (recycled)
         uint64 createdAtBlock;
+        uint64 lastSupplyChangeBlock; // last block where supply changed (buy/sell)
         address creator;
     }
 
@@ -224,7 +227,9 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
             hedgeReserve: 0,
             slope: config.slope,
             graduated: false,
+            sunset: false,
             createdAtBlock: uint64(block.number),
+            lastSupplyChangeBlock: uint64(block.number),
             creator: msg.sender
         });
 
@@ -249,6 +254,7 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
         if (hedgeAmount == 0) revert ZeroAmount();
         SpokeData storage spoke = _spokes[spokeId];
         if (spoke.slope == 0) revert SpokeNotFound();
+        if (spoke.sunset) revert SpokeAlreadySunset();
 
         _enforceSameBlockLock(spokeId, msg.sender);
         _enforceEOAProtection(spoke.createdAtBlock);
@@ -270,6 +276,7 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
         // Update spoke state
         spoke.supply += tokensOut;
         spoke.hedgeReserve += netHedge;
+        spoke.lastSupplyChangeBlock = uint64(block.number);
         spokeBalances[spokeId][msg.sender] += tokensOut;
 
         // Check graduation
@@ -296,6 +303,7 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
         if (tokenAmount == 0) revert ZeroAmount();
         SpokeData storage spoke = _spokes[spokeId];
         if (spoke.slope == 0) revert SpokeNotFound();
+        if (spoke.sunset) revert SpokeAlreadySunset();
         require(spokeBalances[spokeId][msg.sender] >= tokenAmount, "Insufficient balance");
 
         _enforceSameBlockLock(spokeId, msg.sender);
@@ -317,6 +325,7 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
         // Update spoke state
         spoke.supply -= tokenAmount;
         spoke.hedgeReserve -= grossHedge;
+        spoke.lastSupplyChangeBlock = uint64(block.number);
         spokeBalances[spokeId][msg.sender] -= tokenAmount;
 
         // Transfer HEDGE to seller
@@ -416,6 +425,39 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
     }
 
     // -------------------------------------------------------------------------
+    //  Spoke — Sunset (reclaim dead spokes at minimum supply)
+    // -------------------------------------------------------------------------
+
+    /// @notice Sunset a spoke that has been sitting at minimum supply for 30+ days.
+    ///         Permissionless — anyone can call. Releases locked HEDGE reserve:
+    ///         50% to treasury, 50% to POL engine for LP burn.
+    function sunsetSpoke(uint256 spokeId) external nonReentrant {
+        SpokeData storage spoke = _spokes[spokeId];
+        if (spoke.slope == 0) revert SpokeNotFound();
+        if (spoke.sunset) revert SpokeAlreadySunset();
+        if (spoke.supply != minSpokeSupply) revert SpokeNotAtFloor();
+        if (block.number < spoke.lastSupplyChangeBlock + SUNSET_THRESHOLD) revert SunsetTooEarly();
+
+        spoke.sunset = true;
+
+        uint256 reserve = spoke.hedgeReserve;
+        spoke.hedgeReserve = 0;
+        spoke.supply = 0;
+
+        if (reserve > 0) {
+            uint256 halfReserve = reserve / 2;
+
+            // 50% → Treasury
+            SafeTransferLib.safeTransfer(address(hedgeToken), treasury, halfReserve);
+
+            // 50% → POL engine (accumulated fees for next crank)
+            accumulatedFees += reserve - halfReserve;
+        }
+
+        emit SpokeSunset(spokeId, reserve);
+    }
+
+    // -------------------------------------------------------------------------
     //  View Functions
     // -------------------------------------------------------------------------
 
@@ -426,7 +468,9 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
             hedgeReserve: s.hedgeReserve,
             slope: s.slope,
             graduated: s.graduated,
+            sunset: s.sunset,
             createdAtBlock: s.createdAtBlock,
+            lastSupplyChangeBlock: s.lastSupplyChangeBlock,
             creator: s.creator
         });
     }

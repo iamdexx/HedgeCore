@@ -523,6 +523,172 @@ contract HedgehogCoreTest is Test {
         assertEq(core.minSpokeSupply(), 10_000e18);
     }
 
+    // -------------------------------------------------------------------------
+    //  Spoke Sunset Tests
+    // -------------------------------------------------------------------------
+
+    /// @dev Helper: buy tokens on a spoke, then sell down to exactly the floor.
+    function _sellDownToFloor(uint256 spokeId) internal {
+        IHedgehogCore.SpokeState memory state = core.getSpokeState(spokeId);
+        uint256 minFloor = core.minSpokeSupply();
+        if (state.supply > minFloor) {
+            uint256 excessSupply = state.supply - minFloor;
+            uint256 aliceBal = core.getSpokeBalance(spokeId, alice);
+            uint256 sellAmt = excessSupply > aliceBal ? aliceBal : excessSupply;
+            if (sellAmt > 0) {
+                vm.roll(block.number + 1);
+                vm.prank(alice, alice);
+                core.spokeSell(spokeId, sellAmt, 0);
+            }
+        }
+    }
+
+    function test_sunsetSpoke_success() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+        vm.stopPrank();
+
+        // Sell down to floor
+        _sellDownToFloor(spokeId);
+
+        IHedgehogCore.SpokeState memory state = core.getSpokeState(spokeId);
+        assertEq(state.supply, core.minSpokeSupply(), "Supply should be at floor");
+        uint256 reserveBefore = state.hedgeReserve;
+        assertGt(reserveBefore, 0, "Reserve should be non-zero");
+
+        uint256 treasuryBefore = token.balanceOf(treasury);
+        uint256 feesBefore = core.accumulatedFees();
+
+        // Advance past sunset threshold
+        vm.roll(block.number + core.SUNSET_THRESHOLD() + 1);
+
+        // Anyone can sunset
+        vm.prank(bob);
+        core.sunsetSpoke(spokeId);
+
+        IHedgehogCore.SpokeState memory stateAfter = core.getSpokeState(spokeId);
+        assertTrue(stateAfter.sunset, "Spoke should be sunset");
+        assertEq(stateAfter.supply, 0, "Supply should be 0 after sunset");
+        assertEq(stateAfter.hedgeReserve, 0, "Reserve should be 0 after sunset");
+
+        // 50% to treasury
+        uint256 treasuryAfter = token.balanceOf(treasury);
+        assertEq(treasuryAfter - treasuryBefore, reserveBefore / 2, "Treasury should get 50%");
+
+        // 50% to POL fees
+        uint256 feesAfter = core.accumulatedFees();
+        assertEq(feesAfter - feesBefore, reserveBefore - reserveBefore / 2, "POL should get 50%");
+    }
+
+    function test_sunsetSpoke_notAtFloor_reverts() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+        vm.stopPrank();
+
+        // Supply is above floor — sunset should fail
+        vm.roll(block.number + core.SUNSET_THRESHOLD() + 1);
+        vm.expectRevert(IHedgehogCore.SpokeNotAtFloor.selector);
+        core.sunsetSpoke(spokeId);
+    }
+
+    function test_sunsetSpoke_tooEarly_reverts() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+        vm.stopPrank();
+
+        _sellDownToFloor(spokeId);
+
+        // Not enough time passed — sunset should fail
+        vm.expectRevert(IHedgehogCore.SunsetTooEarly.selector);
+        core.sunsetSpoke(spokeId);
+    }
+
+    function test_sunsetSpoke_alreadySunset_reverts() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+        vm.stopPrank();
+
+        _sellDownToFloor(spokeId);
+        vm.roll(block.number + core.SUNSET_THRESHOLD() + 1);
+
+        core.sunsetSpoke(spokeId);
+
+        // Second sunset should fail
+        vm.expectRevert(IHedgehogCore.SpokeAlreadySunset.selector);
+        core.sunsetSpoke(spokeId);
+    }
+
+    function test_sunsetSpoke_blocksTrading() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+        vm.stopPrank();
+
+        _sellDownToFloor(spokeId);
+        vm.roll(block.number + core.SUNSET_THRESHOLD() + 1);
+        core.sunsetSpoke(spokeId);
+
+        // Try to buy on sunset spoke
+        vm.prank(bob, bob);
+        core.hubBuyHedge{value: 1 ether}(0);
+        uint256 bobHedge = token.balanceOf(bob);
+
+        vm.startPrank(bob, bob);
+        token.approve(address(core), bobHedge);
+        vm.expectRevert(IHedgehogCore.SpokeAlreadySunset.selector);
+        core.spokeBuy(spokeId, bobHedge, 0);
+        vm.stopPrank();
+    }
+
+    function test_sunsetSpoke_buyResetsTimer() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+        vm.stopPrank();
+
+        _sellDownToFloor(spokeId);
+
+        // Advance almost to sunset threshold
+        vm.roll(block.number + core.SUNSET_THRESHOLD() - 10);
+
+        // Someone buys — this pushes supply above floor AND resets timer
+        vm.prank(bob, bob);
+        core.hubBuyHedge{value: 1 ether}(0);
+        uint256 bobHedge = token.balanceOf(bob);
+
+        vm.startPrank(bob, bob);
+        token.approve(address(core), bobHedge);
+        core.spokeBuy(spokeId, bobHedge / 2, 0);
+        vm.stopPrank();
+
+        // Supply is above floor now — sunset fails
+        vm.roll(block.number + core.SUNSET_THRESHOLD() + 1);
+        vm.expectRevert(IHedgehogCore.SpokeNotAtFloor.selector);
+        core.sunsetSpoke(spokeId);
+    }
+
     function test_spokeApprove_maxAllowance() public {
         uint256 spokeId = _launchAndFundAlice();
 
