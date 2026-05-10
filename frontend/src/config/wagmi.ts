@@ -46,7 +46,7 @@ const chains =
 
 export const config = getDefaultConfig({
   appName: "Hedgehog Protocol",
-  projectId: "hedgehog-protocol",
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "62e7452dd44d83bbfe12c92ef0da6bf6",
   chains: chains as any,
   transports: {
     [sonic.id]: fallback([
