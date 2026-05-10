@@ -1,9 +1,27 @@
-// Contract addresses — update after deployment
-export const CONTRACTS = {
-  hedgeToken: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-  hedgehogCore: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-  hedgehogRouter: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+// Contract addresses per network
+const ADDRESSES = {
+  // Local Anvil deployment
+  anvil: {
+    hedgeToken: "0x5fbdb2315678afecb367f032d93f642f64180aa3" as `0x${string}`,
+    hedgehogCore: "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512" as `0x${string}`,
+    hedgehogRouter: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0" as `0x${string}`,
+  },
+  // Sonic testnet — update after testnet deployment
+  testnet: {
+    hedgeToken: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    hedgehogCore: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    hedgehogRouter: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+  },
+  // Sonic mainnet — update after mainnet deployment
+  mainnet: {
+    hedgeToken: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    hedgehogCore: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    hedgehogRouter: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+  },
 } as const;
+
+const network = process.env.NEXT_PUBLIC_NETWORK ?? "anvil";
+export const CONTRACTS = ADDRESSES[network as keyof typeof ADDRESSES] ?? ADDRESSES.anvil;
 
 export const HEDGE_TOKEN_ABI = [
   {

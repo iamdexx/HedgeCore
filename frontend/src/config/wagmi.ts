@@ -27,9 +27,22 @@ export const sonicTestnet: Chain = {
   testnet: true,
 };
 
-const chains = process.env.NEXT_PUBLIC_NETWORK === "testnet"
-  ? [sonicTestnet] as const
-  : [sonic] as const;
+export const localhost: Chain = {
+  id: 31337,
+  name: "Anvil",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["http://127.0.0.1:8545"] },
+  },
+};
+
+const networkEnv = process.env.NEXT_PUBLIC_NETWORK ?? "anvil";
+const chains =
+  networkEnv === "testnet"
+    ? [sonicTestnet] as const
+    : networkEnv === "anvil"
+      ? [localhost] as const
+      : [sonic] as const;
 
 export const config = getDefaultConfig({
   appName: "Hedgehog Protocol",
@@ -41,6 +54,7 @@ export const config = getDefaultConfig({
       http("https://sonic-rpc.publicnode.com"),
     ]),
     [sonicTestnet.id]: http("https://rpc.testnet.soniclabs.com"),
+    [localhost.id]: http("http://127.0.0.1:8545"),
   },
   ssr: true,
 });
