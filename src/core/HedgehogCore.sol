@@ -82,6 +82,7 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
     uint256 public equityRateBps = 1000; // 0.1% of remaining supply per launch
     uint256 public minSlope = 1e12; // minimum slope (WAD)
     uint256 public maxSlope = 1e22; // maximum slope (WAD)
+    uint256 public minSpokeSupply = 10_000e18; // floor: 10,000 tokens
     address public treasury;
 
     // -------------------------------------------------------------------------
@@ -310,6 +311,9 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
 
         if (netHedge < minHedgeOut) revert InsufficientOutput();
 
+        // Enforce minimum supply floor
+        if (spoke.supply - tokenAmount < minSpokeSupply) revert BelowMinSpokeSupply();
+
         // Update spoke state
         spoke.supply -= tokenAmount;
         spoke.hedgeReserve -= grossHedge;
@@ -510,6 +514,11 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
         require(_min < _max, "Invalid bounds");
         minSlope = _min;
         maxSlope = _max;
+    }
+
+    function setMinSpokeSupply(uint256 _minSupply) external onlyOwner {
+        emit MinSpokeSupplyUpdated(minSpokeSupply, _minSupply);
+        minSpokeSupply = _minSupply;
     }
 
     // -------------------------------------------------------------------------

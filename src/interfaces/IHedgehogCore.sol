@@ -72,6 +72,8 @@ interface IHedgehogCore {
 
     event FeeUpdated(uint256 oldFee, uint256 newFee);
 
+    event MinSpokeSupplyUpdated(uint256 oldMin, uint256 newMin);
+
     // --- Errors ---
 
     error InsufficientToll();
@@ -86,6 +88,7 @@ interface IHedgehogCore {
     error InsufficientOutput();
     error InsufficientAllowance();
     error InsufficientSpokeBalance();
+    error BelowMinSpokeSupply();
 
     // --- Core Functions ---
 

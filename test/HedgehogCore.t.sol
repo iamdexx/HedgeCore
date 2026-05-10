@@ -456,6 +456,73 @@ contract HedgehogCoreTest is Test {
         core.spokeTransferFrom(spokeId, alice, bob, 1e18 + 1);
     }
 
+    // -------------------------------------------------------------------------
+    //  Minimum Spoke Supply Floor Tests
+    // -------------------------------------------------------------------------
+
+    function test_spokeSell_belowFloorReverts() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+
+        uint256 memeBal = core.getSpokeBalance(spokeId, alice);
+        assertGt(memeBal, 0);
+
+        // Try to sell everything — should revert because supply would go below floor
+        vm.roll(block.number + 1);
+        vm.expectRevert(IHedgehogCore.BelowMinSpokeSupply.selector);
+        core.spokeSell(spokeId, memeBal, 0);
+        vm.stopPrank();
+    }
+
+    function test_spokeSell_aboveFloorSucceeds() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+
+        uint256 memeBal = core.getSpokeBalance(spokeId, alice);
+        uint256 minFloor = core.minSpokeSupply();
+        IHedgehogCore.SpokeState memory state = core.getSpokeState(spokeId);
+
+        // Sell enough to leave supply exactly at floor + 1 wei
+        uint256 maxSellable = state.supply - minFloor - 1;
+        require(maxSellable > 0, "Not enough tokens above floor to test");
+        uint256 sellAmount = maxSellable > memeBal ? memeBal : maxSellable;
+
+        vm.roll(block.number + 1);
+        uint256 hedgeBefore = token.balanceOf(alice);
+        core.spokeSell(spokeId, sellAmount, 0);
+        vm.stopPrank();
+
+        uint256 hedgeAfter = token.balanceOf(alice);
+        assertGt(hedgeAfter, hedgeBefore, "Should receive HEDGE from sell");
+
+        IHedgehogCore.SpokeState memory stateAfter = core.getSpokeState(spokeId);
+        assertGe(stateAfter.supply, minFloor, "Supply should be at or above floor");
+    }
+
+    function test_setMinSpokeSupply() public {
+        vm.prank(owner);
+        core.setMinSpokeSupply(20_000e18);
+        assertEq(core.minSpokeSupply(), 20_000e18);
+    }
+
+    function test_setMinSpokeSupply_onlyOwner() public {
+        vm.prank(alice);
+        vm.expectRevert();
+        core.setMinSpokeSupply(20_000e18);
+    }
+
+    function test_minSpokeSupply_defaultValue() public view {
+        assertEq(core.minSpokeSupply(), 10_000e18);
+    }
+
     function test_spokeApprove_maxAllowance() public {
         uint256 spokeId = _launchAndFundAlice();
 

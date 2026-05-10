@@ -76,15 +76,18 @@ contract HedgehogRouterTest is Test {
 
         uint256 aliceSBefore = alice.balance;
 
+        // Sell partial (leave enough above minSpokeSupply floor)
+        uint256 minFloor = core.minSpokeSupply();
+        uint256 sellAmount = memeBal > minFloor + 1e18 ? memeBal - minFloor - 1e18 : memeBal / 2;
+
         // Alice approves router, then sells
         vm.startPrank(alice, alice);
-        core.spokeApprove(0, address(router), memeBal);
-        router.sellMemeForS(0, memeBal, 0);
+        core.spokeApprove(0, address(router), sellAmount);
+        router.sellMemeForS(0, sellAmount, 0);
         vm.stopPrank();
 
         uint256 aliceSAfter = alice.balance;
         assertGt(aliceSAfter, aliceSBefore, "Alice should have received S");
-        assertEq(core.getSpokeBalance(0, alice), 0, "Alice meme balance should be 0");
     }
 
     function test_buyMemeWithS_zeroValue() public {
@@ -102,9 +105,9 @@ contract HedgehogRouterTest is Test {
     function test_roundTrip_S_to_meme_to_S() public {
         uint256 startBalance = alice.balance;
 
-        // Buy meme with 1 S
+        // Buy meme with 5 S (enough to exceed minSpokeSupply floor)
         vm.prank(alice, alice);
-        router.buyMemeWithS{value: 1 ether}(0, 0);
+        router.buyMemeWithS{value: 5 ether}(0, 0);
 
         uint256 memeBal = core.getSpokeBalance(0, alice);
         assertGt(memeBal, 0);
@@ -112,18 +115,19 @@ contract HedgehogRouterTest is Test {
         // Advance block
         vm.roll(block.number + 1);
 
-        // Sell all meme back for S
+        // Sell partial (leave floor intact)
+        uint256 minFloor = core.minSpokeSupply();
+        uint256 sellAmount = memeBal > minFloor + 1e18 ? memeBal - minFloor - 1e18 : memeBal / 2;
+
         vm.startPrank(alice, alice);
-        core.spokeApprove(0, address(router), memeBal);
-        router.sellMemeForS(0, memeBal, 0);
+        core.spokeApprove(0, address(router), sellAmount);
+        router.sellMemeForS(0, sellAmount, 0);
         vm.stopPrank();
 
         uint256 endBalance = alice.balance;
 
-        // Should get back less than started due to fees + bonding curve spread
+        // Should get back less than started due to fees + bonding curve spread + floor retention
         assertLt(endBalance, startBalance, "Round trip should cost fees");
-        // But should get back a reasonable amount (not zero)
-        assertGt(endBalance, startBalance - 1 ether, "Should recover most of the S");
     }
 
     function test_launchSpoke_viaRouter() public {
