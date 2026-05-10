@@ -424,7 +424,7 @@ export default function LandingPage() {
           </a>
           <span className="text-zinc-800">|</span>
           <Link
-            href="/WHITEPAPER.md"
+            href="/whitepaper"
             className="text-xs font-bold uppercase tracking-wider text-zinc-600 hover:text-violet-400 transition-colors"
           >
             Whitepaper
