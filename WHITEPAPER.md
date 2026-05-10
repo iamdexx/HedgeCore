@@ -8,9 +8,9 @@
 
 ## what is this
 
-Hedgehog Protocol is a hub-and-spoke token factory on the Sonic network. Anyone can launch a meme token in one click. Every token has instant liquidity from block one — no LPs needed, no rug possible. All liquidity is protocol-owned and permanent. It never leaves.
+Hedgehog Protocol is a hub-and-spoke token factory on the Sonic network. Anyone can launch a meme token in one click. Every token has instant liquidity from block one — no external LPs needed. All liquidity is protocol-owned and non-withdrawable.
 
-The protocol runs on a single hub token called **$HEDGE**. Meme tokens are priced in HEDGE via bonding curves. HEDGE itself is tradeable against native S and USDC through two constant-product AMM pools. The pools grow every time someone launches a new meme or trades — and they can never shrink.
+The protocol runs on a single hub token called **$HEDGE**. Meme tokens are priced in HEDGE via bonding curves. HEDGE itself is tradeable against native S and USDC through two constant-product AMM pools. The pools receive fee deposits every time someone launches a new meme or trades. There is no withdrawal mechanism.
 
 ---
 
@@ -21,7 +21,7 @@ The protocol runs on a single hub token called **$HEDGE**. Meme tokens are price
 3. All trades go through HEDGE: you buy HEDGE from the hub pool, then buy the meme with HEDGE
 4. A **1% fee** is collected on every hub swap in HEDGE
 5. Those fees are permanently deposited back into the hub pools — split 50/50 between the S pool and the USDC pool
-6. Nobody can ever withdraw this liquidity. There are no LP tokens. It's gone forever (in a good way)
+6. There are no LP tokens and no withdrawal mechanism. Deposited liquidity is non-retrievable
 
 ---
 
@@ -97,7 +97,7 @@ The treasury half goes to a multisig controlled by the team. The hub pool half i
 Each meme launch also mints **0.1% of HEDGE's remaining unminted supply** and sends it to the treasury. This means:
 
 - Early launches mint more HEDGE (the remaining supply is larger)
-- Later launches mint less (diminishing returns)
+- Later launches mint less (geometric decay)
 - Total HEDGE supply is capped at 5B — the equity minting rate approaches zero asymptotically
 
 This is not dilution in the traditional sense — the HEDGE is minted into the treasury, not into circulation. It doesn't affect the hub pool reserves or the bonding curve mechanics.

@@ -119,7 +119,7 @@ function GraduatedCard({ spokeId }: { spokeId: number }) {
 
         {/* trade cta */}
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-xs text-zinc-600">50k+ HEDGE locked forever</p>
+          <p className="text-xs text-zinc-600">50k+ HEDGE in protocol LP</p>
           <span className="text-xs font-bold uppercase text-green-400 group-hover:text-green-300 transition-colors">
             trade &rarr;
           </span>
