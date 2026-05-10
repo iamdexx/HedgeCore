@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/launch", label: "launch" },
   { href: "/graduate", label: "pro dex" },
   { href: "/analytics", label: "protocol" },
+  { href: "/whitepaper", label: "docs" },
 ];
 
 export function Navbar() {
