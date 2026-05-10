@@ -7,7 +7,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useState } from "react";
 
 const NAV_ITEMS = [
-  { href: "/", label: "hub" },
+  { href: "/hub", label: "hub" },
   { href: "/trade", label: "trade" },
   { href: "/explore", label: "explore" },
   { href: "/launch", label: "launch" },
