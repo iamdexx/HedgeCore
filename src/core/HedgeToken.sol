@@ -8,7 +8,7 @@ import {Ownable} from "solady/auth/Ownable.sol";
 /// @notice ERC-20 token with a fixed max supply and controlled minting.
 ///         Only the designated minter (HedgehogCore) can mint new tokens.
 contract HedgeToken is ERC20, Ownable {
-    uint256 public constant MAX_SUPPLY = 1_000_000_000e18; // 1 billion tokens
+    uint256 public constant MAX_SUPPLY = 5_000_000_000e18; // 5 billion tokens
 
     address public minter;
 

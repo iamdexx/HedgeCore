@@ -7,6 +7,7 @@ import {
   CONTRACTS,
   HEDGEHOG_CORE_ABI,
   HEDGE_TOKEN_ABI,
+  USDC_ADDRESS,
 } from "@/config/contracts";
 
 function StatCard({
@@ -151,7 +152,7 @@ export default function HubPage() {
         <StatCard
           label="total supply"
           value={`${fmt(totalSupply)}`}
-          sub="1B max, deflationary"
+          sub="5B max, deflationary"
           icon={<HedgeIcon />}
         />
         <StatCard

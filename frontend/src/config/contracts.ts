@@ -12,16 +12,59 @@ const ADDRESSES = {
     hedgehogCore: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     hedgehogRouter: "0x0000000000000000000000000000000000000000" as `0x${string}`,
   },
-  // Sonic mainnet — update after mainnet deployment
+  // Sonic mainnet — deployed 2026-05-10
   mainnet: {
-    hedgeToken: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-    hedgehogCore: "0x0000000000000000000000000000000000000000" as `0x${string}`,
-    hedgehogRouter: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    hedgeToken: "0x5cccEbCb0C0af721a6539aFDa1628EeaAF7d6C5c" as `0x${string}`,
+    hedgehogCore: "0x985a53B9B82eF766E69Fd7Da49E4d53e1a13A27e" as `0x${string}`,
+    hedgehogRouter: "0xB09fb21bA329F3318101A9C6C454080b6D2abbB2" as `0x${string}`,
   },
 } as const;
 
 const network = process.env.NEXT_PUBLIC_NETWORK ?? "anvil";
 export const CONTRACTS = ADDRESSES[network as keyof typeof ADDRESSES] ?? ADDRESSES.anvil;
+
+// USDC address on Sonic mainnet (Circle native, 6 decimals)
+export const USDC_ADDRESS = "0x29219dd400f2Bf60E5a23d13Be72B486D4038894" as `0x${string}`;
+export const USDC_DECIMALS = 6;
+
+// Minimal ERC20 ABI for USDC interactions
+export const ERC20_ABI = [
+  {
+    "type": "function",
+    "name": "approve",
+    "inputs": [{"name": "spender", "type": "address"}, {"name": "amount", "type": "uint256"}],
+    "outputs": [{"name": "", "type": "bool"}],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "balanceOf",
+    "inputs": [{"name": "account", "type": "address"}],
+    "outputs": [{"name": "", "type": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "allowance",
+    "inputs": [{"name": "owner", "type": "address"}, {"name": "spender", "type": "address"}],
+    "outputs": [{"name": "", "type": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "decimals",
+    "inputs": [],
+    "outputs": [{"name": "", "type": "uint8"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "symbol",
+    "inputs": [],
+    "outputs": [{"name": "", "type": "string"}],
+    "stateMutability": "view"
+  }
+] as const;
 
 export const HEDGE_TOKEN_ABI = [
   {
@@ -966,6 +1009,92 @@ export const HEDGEHOG_CORE_ABI = [
     "type": "error",
     "name": "ZeroAmount",
     "inputs": []
+  },
+  {
+    "type": "function",
+    "name": "getERC20HubPool",
+    "inputs": [{"name": "quoteToken", "type": "address"}],
+    "outputs": [
+      {"name": "reserveQuote", "type": "uint256"},
+      {"name": "reserveHedge", "type": "uint256"},
+      {"name": "k", "type": "uint256"}
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getERC20HubPrice",
+    "inputs": [{"name": "quoteToken", "type": "address"}],
+    "outputs": [{"name": "", "type": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getERC20PoolTokens",
+    "inputs": [],
+    "outputs": [{"name": "", "type": "address[]"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getERC20HubTWAP",
+    "inputs": [{"name": "quoteToken", "type": "address"}],
+    "outputs": [{"name": "", "type": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "hubBuyHedgeERC20",
+    "inputs": [
+      {"name": "quoteToken", "type": "address"},
+      {"name": "quoteAmount", "type": "uint256"},
+      {"name": "minHedgeOut", "type": "uint256"}
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "hubSellHedgeERC20",
+    "inputs": [
+      {"name": "quoteToken", "type": "address"},
+      {"name": "hedgeAmount", "type": "uint256"},
+      {"name": "minQuoteOut", "type": "uint256"}
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "ERC20HubSwap",
+    "inputs": [
+      {"name": "quoteToken", "type": "address", "indexed": true},
+      {"name": "trader", "type": "address", "indexed": true},
+      {"name": "isBuyHedge", "type": "bool", "indexed": false},
+      {"name": "amountIn", "type": "uint256", "indexed": false},
+      {"name": "amountOut", "type": "uint256", "indexed": false}
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ERC20HubInitialized",
+    "inputs": [
+      {"name": "quoteToken", "type": "address", "indexed": true},
+      {"name": "hedgeAmount", "type": "uint256", "indexed": false},
+      {"name": "quoteAmount", "type": "uint256", "indexed": false}
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "PoolNotInitialized",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "PoolAlreadyInitialized",
+    "inputs": []
   }
 ] as const;
 
@@ -1063,6 +1192,30 @@ export const HEDGEHOG_ROUTER_ABI = [
         "name": "minSOut",
         "type": "uint256"
       }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "buyMemeWithERC20",
+    "inputs": [
+      {"name": "quoteToken", "type": "address"},
+      {"name": "quoteAmount", "type": "uint256"},
+      {"name": "spokeId", "type": "uint256"},
+      {"name": "minTokensOut", "type": "uint256"}
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "sellMemeForERC20",
+    "inputs": [
+      {"name": "quoteToken", "type": "address"},
+      {"name": "spokeId", "type": "uint256"},
+      {"name": "tokenAmount", "type": "uint256"},
+      {"name": "minQuoteOut", "type": "uint256"}
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
