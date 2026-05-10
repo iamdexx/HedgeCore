@@ -5,18 +5,21 @@ const ADDRESSES = {
     hedgeToken: "0x68B1D87F95878fE05B998F19b66F4baba5De1aed" as `0x${string}`,
     hedgehogCore: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c" as `0x${string}`,
     hedgehogRouter: "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d" as `0x${string}`,
+    usdc: "0x0000000000000000000000000000000000000000" as `0x${string}`,
   },
   // Sonic testnet — update after testnet deployment
   testnet: {
     hedgeToken: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     hedgehogCore: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     hedgehogRouter: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    usdc: "0x0000000000000000000000000000000000000000" as `0x${string}`,
   },
   // Sonic mainnet — deployed 2026-05-10
   mainnet: {
     hedgeToken: "0x5cccEbCb0C0af721a6539aFDa1628EeaAF7d6C5c" as `0x${string}`,
     hedgehogCore: "0x985A53B9b82eF766E69FD7DA49E4D53e1A13a27e" as `0x${string}`,
     hedgehogRouter: "0xB09fb21bA329F3318101A9C6C454080b6D2abbB2" as `0x${string}`,
+    usdc: "0x29219dd400f2Bf60E5a23d13Be72B486D4038894" as `0x${string}`,
   },
 } as const;
 

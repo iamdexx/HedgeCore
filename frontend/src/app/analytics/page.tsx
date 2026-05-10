@@ -15,7 +15,9 @@ interface SpokeState {
   hedgeReserve: bigint;
   slope: bigint;
   graduated: boolean;
+  sunset: boolean;
   createdAtBlock: bigint;
+  lastSupplyChangeBlock: bigint;
   creator: `0x${string}`;
 }
 
@@ -266,6 +268,29 @@ export default function AnalyticsPage() {
   });
   const treasuryBalance = rawTreasuryBal as bigint | undefined;
 
+  // --- USDC Hub Pool reads ---
+  const usdcAddr = CONTRACTS.usdc;
+  const hasUsdcPool = usdcAddr !== "0x0000000000000000000000000000000000000000";
+
+  const { data: rawUsdcPool } = useReadContract({
+    address: CONTRACTS.hedgehogCore,
+    abi: HEDGEHOG_CORE_ABI,
+    functionName: "getERC20HubPool",
+    args: hasUsdcPool ? [usdcAddr] : undefined,
+  });
+  const usdcPool = rawUsdcPool as [bigint, bigint, bigint] | undefined;
+  const usdcReserveQuote = usdcPool?.[0];
+  const usdcReserveHedge = usdcPool?.[1];
+  const usdcK = usdcPool?.[2];
+
+  const { data: rawUsdcPrice } = useReadContract({
+    address: CONTRACTS.hedgehogCore,
+    abi: HEDGEHOG_CORE_ABI,
+    functionName: "getERC20HubPrice",
+    args: hasUsdcPool ? [usdcAddr] : undefined,
+  });
+  const usdcHubPrice = rawUsdcPrice as bigint | undefined;
+
   // --- Derived metrics ---
   const supplyMinted = totalSupply ?? BigInt(0);
   const supplyRemaining = MAX_SUPPLY - supplyMinted;
@@ -391,6 +416,64 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
+      {/* Section: USDC Hub Pool */}
+      {hasUsdcPool && (
+        <div className="mb-8">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">
+              usdc pool
+            </h2>
+            <span className="text-xs font-bold uppercase text-zinc-600">
+              hedge / usdc amm
+            </span>
+          </div>
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+            <StatBox
+              label="USDC reserves"
+              value={
+                usdcReserveQuote !== undefined
+                  ? `${(Number(usdcReserveQuote) / 1e6).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`
+                  : "\u2014"
+              }
+              sub="locked forever"
+              color="green"
+            />
+            <StatBox
+              label="hedge reserves"
+              value={fmtCompact(usdcReserveHedge)}
+              sub="permanent liquidity"
+              icon={<HedgeIcon size={16} />}
+            />
+            <StatBox
+              label="HEDGE price (USDC)"
+              value={
+                usdcHubPrice !== undefined
+                  ? `${(Number(usdcHubPrice) / 1e36).toLocaleString(undefined, { maximumFractionDigits: 6 })} USDC`
+                  : "\u2014"
+              }
+              sub="per HEDGE via USDC pool"
+              color="violet"
+            />
+            <StatBox
+              label="pool K invariant"
+              value={
+                usdcK !== undefined
+                  ? (() => {
+                      const k = Number(usdcK) / 1e24;
+                      if (k >= 1_000_000) return `${(k / 1_000_000).toFixed(2)}M`;
+                      if (k >= 1_000) return `${(k / 1_000).toFixed(1)}K`;
+                      return k.toFixed(2);
+                    })()
+                  : "\u2014"
+              }
+              sub="only goes up"
+              color="green"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Section: Treasury */}
       <div className="mb-8">
         <div className="mb-3 flex items-center gap-2">
@@ -454,10 +537,10 @@ export default function AnalyticsPage() {
             label="equity rate"
             value={
               equityRate !== undefined
-                ? `${(Number(equityRate) / 10000).toFixed(2)}%`
+                ? `${(Number(equityRate) / 100).toFixed(2)}%`
                 : "\u2014"
             }
-            sub="of remaining supply / launch"
+            sub={`${equityRate !== undefined ? equityRate.toString() : "\u2014"} bps / launch`}
           />
           <StatBox
             label="memes launched"
