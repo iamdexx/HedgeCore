@@ -125,8 +125,8 @@ export default function HubPage() {
           the pump is <span className="text-violet-400">live</span>
         </h1>
         <p className="mx-auto mt-4 max-w-lg text-base text-zinc-500 sm:text-lg">
-          ape into $HEDGE. launch memes. every trade hardens the floor.
-          the only way is up anon.
+          ape into $HEDGE. launch memes. trade on bonding curves.
+          all liquidity is protocol-owned.
         </p>
         <div className="mx-auto mt-3 flex items-center justify-center gap-2">
           <span className="pulse-dot inline-block h-2 w-2 rounded-full bg-green-500" />
@@ -138,13 +138,13 @@ export default function HubPage() {
         <StatCard
           label="$hedge price"
           value={`${fmt(hubPrice)} S`}
-          sub="floor only goes up"
+          sub="protocol-owned AMM"
           icon={<HedgeIcon />}
         />
         <StatCard
           label="S pool liquidity"
           value={`${fmt(hubReserveS)} S`}
-          sub="locked forever"
+          sub="non-withdrawable"
         />
         {hasUsdcPool && (
           <StatCard
@@ -154,7 +154,7 @@ export default function HubPage() {
                 ? `${(Number(usdcReserveQuote) / 1e6).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`
                 : "\u2014"
             }
-            sub="locked forever"
+            sub="non-withdrawable"
           />
         )}
         <StatCard
@@ -195,7 +195,7 @@ export default function HubPage() {
             <h3 className="font-bold text-white">launch a meme</h3>
             <p className="mt-1 text-sm text-zinc-500">
               pay the toll in $S. half buys HEDGE for treasury,
-              half becomes permanent LP across both pools. floor goes up.
+              half deposits into protocol-owned LP across both pools.
             </p>
           </div>
           <div>
@@ -205,17 +205,17 @@ export default function HubPage() {
             <h3 className="font-bold text-white">trade it</h3>
             <p className="mt-1 text-sm text-zinc-500">
               buy and sell memes on bonding curves backed by $HEDGE.
-              1% fee feeds the engine. number go up technology.
+              1% fee accumulates for protocol-owned liquidity.
             </p>
           </div>
           <div>
             <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-violet-600/30 text-violet-400 font-black text-lg border border-violet-500/20">
               3
             </div>
-            <h3 className="font-bold text-white">floor rises</h3>
+            <h3 className="font-bold text-white">permanent liquidity</h3>
             <p className="mt-1 text-sm text-zinc-500">
-              every action locks HEDGE permanently. the price floor
-              only goes up. its a liquidity black hole ser.
+              all hub pool liquidity is protocol-owned. no LP tokens,
+              no withdrawals. fees get cranked back into the pools.
             </p>
           </div>
         </div>

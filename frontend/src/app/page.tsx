@@ -91,9 +91,9 @@ export default function LandingPage() {
             sonic<span className="text-violet-400">pump</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-zinc-400 sm:text-xl">
-            the meme launchpad where every trade hardens the floor.
-            launch tokens on bonding curves backed by{" "}
-            <span className="font-bold text-violet-400">$HEDGE</span>.
+            the meme launchpad built on bonding curves.
+            launch tokens backed by{" "}
+            <span className="font-bold text-violet-400">$HEDGE</span> on Sonic.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
@@ -181,8 +181,8 @@ export default function LandingPage() {
             </h3>
             <p className="mt-2 text-sm text-zinc-500">
               pay the toll in $S. half buys $HEDGE for the treasury, half
-              becomes permanent liquidity. the floor goes up before your token
-              even exists.
+              gets deposited into protocol-owned liquidity. your meme token
+              goes live instantly.
             </p>
           </div>
           <div className="rounded-2xl border-2 border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/30">
@@ -203,12 +203,12 @@ export default function LandingPage() {
               3
             </div>
             <h3 className="text-lg font-black uppercase text-white">
-              floor rises
+              permanent liquidity
             </h3>
             <p className="mt-2 text-sm text-zinc-500">
-              every action locks $HEDGE permanently. the hub pool liquidity
-              can never be withdrawn. it only grows. the price floor only goes
-              up. it&apos;s a liquidity black hole.
+              all hub pool liquidity is protocol-owned. no LP tokens are minted,
+              so no one can withdraw it. fees accumulate and get deposited back
+              into the pools via the permissionless crank.
             </p>
           </div>
         </div>
@@ -235,7 +235,7 @@ export default function LandingPage() {
               <p className="text-sm text-zinc-500">
                 $HEDGE is the reserve asset. it pairs against $S (native Sonic)
                 and USDC (stablecoin) in two protocol-owned pools. no external
-                LPs. no rug risk. liquidity is locked forever.
+                LPs. liquidity is protocol-owned and non-withdrawable.
               </p>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/50">
@@ -296,7 +296,7 @@ export default function LandingPage() {
             </h3>
             <p className="mt-2 text-xs text-zinc-500">
               no LP tokens. no withdrawals. all hub pool liquidity is permanent
-              and grows with every action. the floor only goes up.
+              and grows with every fee deposit. protocol-owned, non-custodial.
             </p>
           </div>
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5">
@@ -396,8 +396,8 @@ export default function LandingPage() {
           ready to <span className="text-violet-400">ape in</span>?
         </h2>
         <p className="mx-auto mt-4 max-w-md text-base text-zinc-500">
-          connect your wallet and start trading. or launch your own meme and
-          watch the floor rise.
+          connect your wallet and start trading. or launch your own meme
+          on a bonding curve.
         </p>
         <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link

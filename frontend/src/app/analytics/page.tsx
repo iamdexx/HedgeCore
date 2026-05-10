@@ -339,7 +339,7 @@ export default function AnalyticsPage() {
           <StatBox
             label="price"
             value={`${fmt(hubPrice)} S`}
-            sub="floor only goes up"
+            sub="protocol-owned AMM"
             icon={<HedgeIcon size={16} />}
             color="violet"
           />
@@ -384,7 +384,7 @@ export default function AnalyticsPage() {
           <StatBox
             label="S reserves"
             value={`${fmt(hubReserveS)} S`}
-            sub="locked forever"
+            sub="non-withdrawable"
             color="green"
           />
           <StatBox
@@ -396,7 +396,7 @@ export default function AnalyticsPage() {
           <StatBox
             label="pool K invariant"
             value={fmtK(hubK)}
-            sub="only goes up"
+            sub="constant product"
             color="green"
           />
           <StatBox
@@ -436,7 +436,7 @@ export default function AnalyticsPage() {
                   ? `${(Number(usdcReserveQuote) / 1e6).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`
                   : "\u2014"
               }
-              sub="locked forever"
+              sub="non-withdrawable"
               color="green"
             />
             <StatBox
@@ -467,7 +467,7 @@ export default function AnalyticsPage() {
                     })()
                   : "\u2014"
               }
-              sub="only goes up"
+              sub="constant product"
               color="green"
             />
           </div>
