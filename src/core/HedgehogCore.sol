@@ -67,6 +67,9 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
     // spokeId => user => balance of the meme token
     mapping(uint256 => mapping(address => uint256)) public spokeBalances;
 
+    // spokeId => owner => spender => allowance
+    mapping(uint256 => mapping(address => mapping(address => uint256))) public spokeAllowances;
+
     // Anti-MEV: spokeId => user => last trade block
     mapping(bytes32 => uint256) public lastTradeBlock;
 
@@ -316,6 +319,52 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
         SafeTransferLib.safeTransfer(address(hedgeToken), msg.sender, netHedge);
 
         emit SpokeSell(spokeId, msg.sender, tokenAmount, netHedge);
+    }
+
+    // -------------------------------------------------------------------------
+    //  Spoke — Transfer & Approval
+    // -------------------------------------------------------------------------
+
+    /// @notice Transfer meme tokens to another address.
+    function spokeTransfer(uint256 spokeId, address to, uint256 amount) external {
+        if (amount == 0) revert ZeroAmount();
+        if (spokeBalances[spokeId][msg.sender] < amount) revert InsufficientSpokeBalance();
+        spokeBalances[spokeId][msg.sender] -= amount;
+        spokeBalances[spokeId][to] += amount;
+        emit SpokeTransfer(spokeId, msg.sender, to, amount);
+    }
+
+    /// @notice Transfer meme tokens on behalf of another address (requires allowance).
+    function spokeTransferFrom(uint256 spokeId, address from, address to, uint256 amount)
+        external
+    {
+        if (amount == 0) revert ZeroAmount();
+        if (spokeBalances[spokeId][from] < amount) revert InsufficientSpokeBalance();
+
+        uint256 allowed = spokeAllowances[spokeId][from][msg.sender];
+        if (allowed != type(uint256).max) {
+            if (allowed < amount) revert InsufficientAllowance();
+            spokeAllowances[spokeId][from][msg.sender] = allowed - amount;
+        }
+
+        spokeBalances[spokeId][from] -= amount;
+        spokeBalances[spokeId][to] += amount;
+        emit SpokeTransfer(spokeId, from, to, amount);
+    }
+
+    /// @notice Approve a spender to transfer meme tokens on your behalf.
+    function spokeApprove(uint256 spokeId, address spender, uint256 amount) external {
+        spokeAllowances[spokeId][msg.sender][spender] = amount;
+        emit SpokeApproval(spokeId, msg.sender, spender, amount);
+    }
+
+    /// @notice Query spoke allowance.
+    function spokeAllowance(uint256 spokeId, address owner_, address spender)
+        external
+        view
+        returns (uint256)
+    {
+        return spokeAllowances[spokeId][owner_][spender];
     }
 
     // -------------------------------------------------------------------------

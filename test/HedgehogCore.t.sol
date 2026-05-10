@@ -373,4 +373,108 @@ contract HedgehogCoreTest is Test {
 
         vm.stopPrank();
     }
+
+    // -------------------------------------------------------------------------
+    //  Spoke Transfer & Approval Tests
+    // -------------------------------------------------------------------------
+
+    function test_spokeTransfer() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+
+        uint256 memeBal = core.getSpokeBalance(spokeId, alice);
+        assertGt(memeBal, 0);
+
+        uint256 transferAmt = memeBal / 3;
+        core.spokeTransfer(spokeId, bob, transferAmt);
+        vm.stopPrank();
+
+        assertEq(core.getSpokeBalance(spokeId, alice), memeBal - transferAmt);
+        assertEq(core.getSpokeBalance(spokeId, bob), transferAmt);
+    }
+
+    function test_spokeTransfer_insufficientBalance() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+
+        uint256 memeBal = core.getSpokeBalance(spokeId, alice);
+
+        vm.expectRevert(IHedgehogCore.InsufficientSpokeBalance.selector);
+        core.spokeTransfer(spokeId, bob, memeBal + 1);
+        vm.stopPrank();
+    }
+
+    function test_spokeApproveAndTransferFrom() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+
+        uint256 memeBal = core.getSpokeBalance(spokeId, alice);
+        uint256 approveAmt = memeBal / 2;
+
+        // Alice approves bob
+        core.spokeApprove(spokeId, bob, approveAmt);
+        vm.stopPrank();
+
+        assertEq(core.spokeAllowance(spokeId, alice, bob), approveAmt);
+
+        // Bob transfers from alice to himself
+        vm.prank(bob, bob);
+        core.spokeTransferFrom(spokeId, alice, bob, approveAmt);
+
+        assertEq(core.getSpokeBalance(spokeId, bob), approveAmt);
+        assertEq(core.getSpokeBalance(spokeId, alice), memeBal - approveAmt);
+        assertEq(core.spokeAllowance(spokeId, alice, bob), 0);
+    }
+
+    function test_spokeTransferFrom_insufficientAllowance() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+
+        // Alice approves bob for small amount
+        core.spokeApprove(spokeId, bob, 1e18);
+        vm.stopPrank();
+
+        // Bob tries to pull more than allowed
+        vm.prank(bob, bob);
+        vm.expectRevert(IHedgehogCore.InsufficientAllowance.selector);
+        core.spokeTransferFrom(spokeId, alice, bob, 1e18 + 1);
+    }
+
+    function test_spokeApprove_maxAllowance() public {
+        uint256 spokeId = _launchAndFundAlice();
+
+        uint256 hedgeBal = token.balanceOf(alice);
+        vm.startPrank(alice, alice);
+        token.approve(address(core), hedgeBal);
+        core.spokeBuy(spokeId, hedgeBal / 2, 0);
+
+        uint256 memeBal = core.getSpokeBalance(spokeId, alice);
+
+        // Max allowance should not decrease
+        core.spokeApprove(spokeId, bob, type(uint256).max);
+        vm.stopPrank();
+
+        uint256 pullAmt = memeBal / 4;
+        vm.prank(bob, bob);
+        core.spokeTransferFrom(spokeId, alice, bob, pullAmt);
+
+        // Max allowance should remain max
+        assertEq(core.spokeAllowance(spokeId, alice, bob), type(uint256).max);
+    }
 }

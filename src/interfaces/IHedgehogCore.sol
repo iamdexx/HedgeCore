@@ -52,6 +52,20 @@ interface IHedgehogCore {
 
     event POLBurn(uint256 hedgeBurned, uint256 sLpBurned);
 
+    event SpokeTransfer(
+        uint256 indexed spokeId,
+        address indexed from,
+        address indexed to,
+        uint256 amount
+    );
+
+    event SpokeApproval(
+        uint256 indexed spokeId,
+        address indexed owner,
+        address indexed spender,
+        uint256 amount
+    );
+
     event TollUpdated(uint256 oldToll, uint256 newToll);
 
     event EquityRateUpdated(uint256 oldRate, uint256 newRate);
@@ -70,6 +84,8 @@ interface IHedgehogCore {
     error ZeroAmount();
     error SlopeOutOfBounds();
     error InsufficientOutput();
+    error InsufficientAllowance();
+    error InsufficientSpokeBalance();
 
     // --- Core Functions ---
 
@@ -78,6 +94,17 @@ interface IHedgehogCore {
     function spokeBuy(uint256 spokeId, uint256 hedgeAmount, uint256 minTokensOut) external;
 
     function spokeSell(uint256 spokeId, uint256 tokenAmount, uint256 minHedgeOut) external;
+
+    function spokeTransfer(uint256 spokeId, address to, uint256 amount) external;
+
+    function spokeTransferFrom(uint256 spokeId, address from, address to, uint256 amount) external;
+
+    function spokeApprove(uint256 spokeId, address spender, uint256 amount) external;
+
+    function spokeAllowance(uint256 spokeId, address owner_, address spender)
+        external
+        view
+        returns (uint256);
 
     function hubBuyHedge(uint256 minHedgeOut) external payable;
 
@@ -94,4 +121,6 @@ interface IHedgehogCore {
     function getHubPrice() external view returns (uint256);
 
     function getTWAP() external view returns (uint256);
+
+    function getSpokeBalance(uint256 spokeId, address account) external view returns (uint256);
 }
