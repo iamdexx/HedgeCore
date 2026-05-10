@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/explore", label: "explore" },
   { href: "/launch", label: "launch" },
   { href: "/graduate", label: "pro dex" },
+  { href: "/analytics", label: "protocol" },
 ];
 
 export function Navbar() {
