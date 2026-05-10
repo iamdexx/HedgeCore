@@ -4,9 +4,10 @@
 #
 # Requirements:
 #   - forge installed
-#   - SONICSCAN_API_KEY env var set (get free key at https://sonicscan.org/myapikey)
+#   - SONICSCAN_API_KEY env var set (Etherscan API key — works for Sonic via V2 API, chain ID 146)
+#     Get a free key at https://etherscan.io/myapikey
 #
-# SonicScan uses the Etherscan API format. Sonic chain ID = 146.
+# SonicScan uses the Etherscan API V2 format. Sonic chain ID = 146.
 
 set -euo pipefail
 
@@ -21,7 +22,8 @@ HEDGEHOG_CORE="${2:?}"
 HEDGEHOG_ROUTER="${3:?}"
 TREASURY="${4:-0x0000000000000000000000000000000000000000}"
 
-VERIFIER_URL="https://api.sonicscan.org/api"
+# Etherscan V2 API endpoint for Sonic (chain ID 146)
+VERIFIER_URL="https://api.etherscan.io/v2/api?chainid=146"
 
 echo "=== Verifying Hedgehog Protocol on SonicScan ==="
 echo "HedgeToken:      $HEDGE_TOKEN"
@@ -60,3 +62,5 @@ echo "Check results at:"
 echo "  https://sonicscan.org/address/$HEDGE_TOKEN#code"
 echo "  https://sonicscan.org/address/$HEDGEHOG_CORE#code"
 echo "  https://sonicscan.org/address/$HEDGEHOG_ROUTER#code"
+echo ""
+echo "Note: SonicScan uses Etherscan API V2. Your Etherscan API key works for Sonic (chain ID 146)."
