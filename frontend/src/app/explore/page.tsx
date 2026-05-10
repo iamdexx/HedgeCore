@@ -10,7 +10,9 @@ interface SpokeState {
   hedgeReserve: bigint;
   slope: bigint;
   graduated: boolean;
+  sunset: boolean;
   createdAtBlock: bigint;
+  lastSupplyChangeBlock: bigint;
   creator: `0x${string}`;
 }
 
@@ -48,11 +50,18 @@ function SpokeCard({ spokeId }: { spokeId: number }) {
               {state ? `Creator: ${state.creator.slice(0, 6)}...` : "Loading..."}
             </h3>
           </div>
-          {state?.graduated && (
-            <span className="rounded-full bg-green-600/20 px-2.5 py-1 text-xs font-medium text-green-400">
-              Graduated
-            </span>
-          )}
+          <div className="flex gap-2">
+            {state?.sunset && (
+              <span className="rounded-full bg-zinc-600/20 px-2.5 py-1 text-xs font-medium text-zinc-400">
+                Sunset
+              </span>
+            )}
+            {state?.graduated && !state?.sunset && (
+              <span className="rounded-full bg-green-600/20 px-2.5 py-1 text-xs font-medium text-green-400">
+                Graduated
+              </span>
+            )}
+          </div>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-3">
           <div>
