@@ -5,6 +5,8 @@ import Image from "next/image";
 import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { formatEther } from "viem";
 import { CONTRACTS, HEDGEHOG_CORE_ABI } from "@/config/contracts";
+import { ImageUpload } from "@/components/ImageUpload";
+import { uploadJsonToIPFS, hasPinataConfig } from "@/lib/ipfs";
 
 const DEFAULT_SLOPE = "100000000000000"; // 1e14
 
@@ -45,8 +47,10 @@ export default function LaunchPage() {
   const { isConnected } = useAccount();
   const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
-  const [metadataURI, setMetadataURI] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageUri, setImageUri] = useState("");
   const [slope, setSlope] = useState(DEFAULT_SLOPE);
+  const [buildingMetadata, setBuildingMetadata] = useState(false);
 
   const { writeContract, isPending, isSuccess, error } = useWriteContract();
 
@@ -57,8 +61,31 @@ export default function LaunchPage() {
   });
   const tollAmount = rawToll as bigint | undefined;
 
-  function handleLaunch() {
+  async function handleLaunch() {
     if (!name || !symbol) return;
+
+    let metadataURI = "";
+
+    if (imageUri || description) {
+      const metadata: Record<string, unknown> = {
+        name,
+        symbol: symbol.toUpperCase(),
+        description: description || `${name} — launched on sonicpump.meme`,
+      };
+      if (imageUri) metadata.image = imageUri;
+
+      if (hasPinataConfig()) {
+        setBuildingMetadata(true);
+        try {
+          metadataURI = await uploadJsonToIPFS(metadata);
+        } catch {
+          metadataURI = "";
+        } finally {
+          setBuildingMetadata(false);
+        }
+      }
+    }
+
     writeContract({
       address: CONTRACTS.hedgehogCore,
       abi: HEDGEHOG_CORE_ABI,
@@ -74,6 +101,8 @@ export default function LaunchPage() {
       value: tollAmount ?? BigInt(0),
     });
   }
+
+  const isLaunching = isPending || buildingMetadata;
 
   return (
     <div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
@@ -124,17 +153,20 @@ export default function LaunchPage() {
 
           <div>
             <label className="mb-1.5 block text-xs font-bold uppercase text-zinc-500">
-              metadata uri{" "}
-              <span className="text-zinc-700">(optional, ipfs)</span>
+              description{" "}
+              <span className="text-zinc-700">(optional)</span>
             </label>
-            <input
-              type="text"
-              value={metadataURI}
-              onChange={(e) => setMetadataURI(e.target.value)}
-              className="w-full rounded-lg border-2 border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-600 focus:border-violet-500 focus:outline-none"
-              placeholder="ipfs://..."
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full rounded-lg border-2 border-zinc-700 bg-zinc-800 px-4 py-3 text-white font-bold placeholder-zinc-600 focus:border-violet-500 focus:outline-none resize-none"
+              placeholder="the most based hedgehog on sonic"
+              rows={2}
+              maxLength={280}
             />
           </div>
+
+          <ImageUpload imageUri={imageUri} onImageUri={setImageUri} />
 
           <div>
             <label className="mb-1.5 block text-xs font-bold uppercase text-zinc-500">
@@ -159,10 +191,14 @@ export default function LaunchPage() {
           ) : (
             <button
               onClick={handleLaunch}
-              disabled={isPending || !name || !symbol}
+              disabled={isLaunching || !name || !symbol}
               className="w-full rounded-lg bg-violet-600 py-3 text-sm font-bold uppercase text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50 border border-violet-500/30"
             >
-              {isPending ? "confirming..." : `launch for ${tollAmount ? formatEther(tollAmount) : "\u2014"} S`}
+              {buildingMetadata
+                ? "pinning metadata to ipfs..."
+                : isPending
+                  ? "confirming..."
+                  : `launch for ${tollAmount ? formatEther(tollAmount) : "\u2014"} S`}
             </button>
           )}
 
