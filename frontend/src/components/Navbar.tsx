@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/trade", label: "trade" },
   { href: "/explore", label: "explore" },
   { href: "/launch", label: "launch" },
+  { href: "/graduate", label: "pro dex" },
 ];
 
 export function Navbar() {
