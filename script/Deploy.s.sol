@@ -41,7 +41,7 @@ contract Deploy is Script {
         uint256 seedS = seedBudget / 2; // 50% of seed budget → S pool
 
         // HEDGE seed: split equally between both pools
-        uint256 totalSeedHedge = vm.envOr("SEED_HEDGE_AMOUNT", uint256(10_000_000e18));
+        uint256 totalSeedHedge = vm.envOr("SEED_HEDGE_AMOUNT", uint256(50_000_000e18));
         uint256 hedgeForSPool = totalSeedHedge / 2;
         uint256 hedgeForUsdcPool = totalSeedHedge - hedgeForSPool;
 

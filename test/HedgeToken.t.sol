@@ -23,7 +23,7 @@ contract HedgeTokenTest is Test {
     }
 
     function test_maxSupply() public view {
-        assertEq(token.MAX_SUPPLY(), 1_000_000_000e18);
+        assertEq(token.MAX_SUPPLY(), 5_000_000_000e18);
     }
 
     function test_mint() public {

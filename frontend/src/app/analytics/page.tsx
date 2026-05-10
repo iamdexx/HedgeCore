@@ -19,7 +19,7 @@ interface SpokeState {
   creator: `0x${string}`;
 }
 
-const MAX_SUPPLY = BigInt("1000000000000000000000000000"); // 1B HEDGE in wei
+const MAX_SUPPLY = BigInt("5000000000000000000000000000"); // 5B HEDGE in wei
 
 function fmt(val: bigint | undefined) {
   if (val === undefined) return "\u2014";
@@ -332,7 +332,7 @@ export default function AnalyticsPage() {
           <StatBox
             label="total supply"
             value={fmtCompact(totalSupply)}
-            sub={`${mintedPercent}% of 1B minted`}
+            sub={`${mintedPercent}% of 5B minted`}
             icon={<HedgeIcon size={16} />}
           />
           <StatBox
