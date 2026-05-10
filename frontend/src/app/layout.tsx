@@ -15,9 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hedgehog Protocol",
+  title: "SonicPump — Memetoken Launchpad on Sonic",
   description:
-    "Memetoken launchpad on Sonic — every launch hardens the $HEDGE floor.",
+    "Launch and trade meme tokens on Sonic. Every launch hardens the $HEDGE floor. sonicpump.meme",
+  icons: {
+    icon: "/hedge-48.png",
+    apple: "/hedge-192.png",
+  },
 };
 
 export default function RootLayout({

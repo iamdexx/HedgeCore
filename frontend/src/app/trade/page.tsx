@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import {
@@ -9,6 +10,45 @@ import {
   HEDGEHOG_CORE_ABI,
   HEDGE_TOKEN_ABI,
 } from "@/config/contracts";
+
+function HedgeIcon({ size = 16 }: { size?: number }) {
+  return (
+    <Image src="/hedge-48.png" alt="HEDGE" width={size} height={size} className="rounded-full" />
+  );
+}
+
+function TxStatus({ isPending, isSuccess, error }: {
+  isPending: boolean;
+  isSuccess: boolean;
+  error: Error | null;
+}) {
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center gap-2 rounded-lg bg-violet-600/10 p-3 text-sm text-violet-400">
+        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        Waiting for confirmation...
+      </div>
+    );
+  }
+  if (isSuccess) {
+    return (
+      <div className="rounded-lg bg-green-600/10 p-3 text-center text-sm text-green-400">
+        Transaction confirmed!
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="rounded-lg bg-red-600/10 p-3 text-sm text-red-400">
+        {error.message.slice(0, 200)}
+      </div>
+    );
+  }
+  return null;
+}
 
 function SpokeTradePanel() {
   const { address, isConnected } = useAccount();
@@ -19,7 +59,7 @@ function SpokeTradePanel() {
 
   const spokeIdBigInt = BigInt(spokeId || "0");
 
-  const { data: rawState } = useReadContract({
+  const { data: rawState, isLoading: stateLoading } = useReadContract({
     address: CONTRACTS.hedgehogCore,
     abi: HEDGEHOG_CORE_ABI,
     functionName: "getSpokeState",
@@ -59,7 +99,7 @@ function SpokeTradePanel() {
       ? Number(formatEther(val)).toLocaleString(undefined, {
           maximumFractionDigits: 4,
         })
-      : "—";
+      : "\u2014";
 
   function handleBuy() {
     if (!amount) return;
@@ -93,8 +133,8 @@ function SpokeTradePanel() {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-      <div className="mb-6 flex gap-2">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-6">
+      <div className="mb-5 flex gap-2 sm:mb-6">
         <button
           onClick={() => setMode("buy")}
           className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
@@ -132,13 +172,20 @@ function SpokeTradePanel() {
           />
         </div>
 
-        {state && (
+        {stateLoading ? (
+          <div className="animate-pulse grid grid-cols-3 gap-3 rounded-lg bg-zinc-800/50 p-3">
+            <div className="h-8 rounded bg-zinc-700" />
+            <div className="h-8 rounded bg-zinc-700" />
+            <div className="h-8 rounded bg-zinc-700" />
+          </div>
+        ) : state ? (
           <div className="grid grid-cols-3 gap-3 rounded-lg bg-zinc-800/50 p-3">
             <div>
               <p className="text-xs text-zinc-500">Price</p>
-              <p className="text-sm font-medium text-white">
-                {fmt(spotPrice)} HEDGE
-              </p>
+              <div className="flex items-center gap-1">
+                <HedgeIcon size={14} />
+                <p className="text-sm font-medium text-white">{fmt(spotPrice)}</p>
+              </div>
             </div>
             <div>
               <p className="text-xs text-zinc-500">Supply</p>
@@ -149,11 +196,11 @@ function SpokeTradePanel() {
             <div>
               <p className="text-xs text-zinc-500">Your Balance</p>
               <p className="text-sm font-medium text-white">
-                {address ? fmt(spokeBalance) : "—"}
+                {address ? fmt(spokeBalance) : "\u2014"}
               </p>
             </div>
           </div>
-        )}
+        ) : null}
 
         <div>
           <label className="mb-1.5 block text-sm text-zinc-400">
@@ -199,16 +246,7 @@ function SpokeTradePanel() {
           </button>
         )}
 
-        {isSuccess && (
-          <div className="rounded-lg bg-green-600/10 p-3 text-center text-sm text-green-400">
-            Transaction confirmed!
-          </div>
-        )}
-        {error && (
-          <div className="rounded-lg bg-red-600/10 p-3 text-sm text-red-400">
-            {error.message.slice(0, 200)}
-          </div>
-        )}
+        <TxStatus isPending={isPending} isSuccess={isSuccess} error={error} />
       </div>
     </div>
   );
@@ -240,7 +278,7 @@ function HubTradePanel() {
       ? Number(formatEther(val)).toLocaleString(undefined, {
           maximumFractionDigits: 6,
         })
-      : "—";
+      : "\u2014";
 
   function handleBuyHedge() {
     if (!amount) return;
@@ -274,8 +312,8 @@ function HubTradePanel() {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-      <div className="mb-6 flex gap-2">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-6">
+      <div className="mb-5 flex gap-2 sm:mb-6">
         <button
           onClick={() => setMode("buy")}
           className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
@@ -301,15 +339,19 @@ function HubTradePanel() {
       <div className="mb-4 grid grid-cols-2 gap-3 rounded-lg bg-zinc-800/50 p-3">
         <div>
           <p className="text-xs text-zinc-500">Hub Price</p>
-          <p className="text-sm font-medium text-white">
-            {fmt(hubPrice)} S/HEDGE
-          </p>
+          <div className="flex items-center gap-1">
+            <HedgeIcon size={14} />
+            <p className="text-sm font-medium text-white">{fmt(hubPrice)} S</p>
+          </div>
         </div>
         <div>
           <p className="text-xs text-zinc-500">Your HEDGE</p>
-          <p className="text-sm font-medium text-white">
-            {address ? fmt(hedgeBalance) : "—"}
-          </p>
+          <div className="flex items-center gap-1">
+            <HedgeIcon size={14} />
+            <p className="text-sm font-medium text-white">
+              {address ? fmt(hedgeBalance) : "\u2014"}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -358,16 +400,7 @@ function HubTradePanel() {
           </button>
         )}
 
-        {isSuccess && (
-          <div className="rounded-lg bg-green-600/10 p-3 text-center text-sm text-green-400">
-            Transaction confirmed!
-          </div>
-        )}
-        {error && (
-          <div className="rounded-lg bg-red-600/10 p-3 text-sm text-red-400">
-            {error.message.slice(0, 200)}
-          </div>
-        )}
+        <TxStatus isPending={isPending} isSuccess={isSuccess} error={error} />
       </div>
     </div>
   );
@@ -377,10 +410,10 @@ export default function TradePage() {
   const [tab, setTab] = useState<"spoke" | "hub">("spoke");
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-12">
-      <h1 className="mb-8 text-3xl font-bold text-white">Trade</h1>
+    <div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
+      <h1 className="mb-6 text-2xl font-bold text-white sm:mb-8 sm:text-3xl">Trade</h1>
 
-      <div className="mb-6 flex gap-2">
+      <div className="mb-5 flex gap-2 sm:mb-6">
         <button
           onClick={() => setTab("spoke")}
           className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
@@ -393,12 +426,13 @@ export default function TradePage() {
         </button>
         <button
           onClick={() => setTab("hub")}
-          className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+          className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
             tab === "hub"
               ? "bg-zinc-700 text-white"
               : "text-zinc-400 hover:text-white"
           }`}
         >
+          <HedgeIcon size={16} />
           HEDGE / S Hub
         </button>
       </div>
