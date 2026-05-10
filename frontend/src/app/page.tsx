@@ -21,13 +21,13 @@ function StatCard({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-6">
-      <p className="text-sm text-zinc-400">{label}</p>
+    <div className="degen-card">
+      <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">{label}</p>
       <div className="mt-2 flex items-center gap-2">
         {icon}
-        <p className="text-xl font-bold text-white sm:text-2xl">{value}</p>
+        <p className="text-xl font-black text-white sm:text-2xl">{value}</p>
       </div>
-      {sub && <p className="mt-1 text-xs text-zinc-500">{sub}</p>}
+      {sub && <p className="mt-1 text-xs text-zinc-600">{sub}</p>}
     </div>
   );
 }
@@ -99,98 +99,106 @@ export default function HubPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
-      <div className="mb-10 text-center sm:mb-12">
+      <div className="mb-10 text-center sm:mb-14">
         <div className="mx-auto mb-4 flex items-center justify-center gap-3">
           <Image
             src="/hedge-token.png"
             alt="HEDGE Token"
-            width={64}
-            height={64}
+            width={72}
+            height={72}
             className="rounded-full"
           />
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
-          Sonic<span className="text-violet-400">Pump</span> Hub
+        <h1 className="glow-text text-4xl font-black uppercase tracking-tight text-white sm:text-6xl">
+          the pump is <span className="text-violet-400">live</span>
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-base text-zinc-400 sm:mt-4 sm:text-lg">
-          The $HEDGE / $S liquidity center. Every spoke launch and trade
-          hardens the floor.
+        <p className="mx-auto mt-4 max-w-lg text-base text-zinc-500 sm:text-lg">
+          ape into $HEDGE. launch memes. every trade hardens the floor.
+          the only way is up anon.
         </p>
+        <div className="mx-auto mt-3 flex items-center justify-center gap-2">
+          <span className="pulse-dot inline-block h-2 w-2 rounded-full bg-green-500" />
+          <span className="text-xs font-bold uppercase tracking-widest text-green-500">live on sonic</span>
+        </div>
       </div>
 
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 sm:gap-4">
         <StatCard
-          label="Hub Price"
+          label="$hedge price"
           value={`${fmt(hubPrice)} S`}
-          sub="per HEDGE"
+          sub="floor only goes up"
           icon={<HedgeIcon />}
         />
         <StatCard
-          label="Hub Liquidity (S)"
+          label="liquidity (S)"
           value={`${fmt(hubReserveS)} S`}
+          sub="locked forever"
         />
         <StatCard
-          label="Hub Liquidity"
+          label="liquidity (hedge)"
           value={`${fmt(hubReserveHedge)}`}
+          sub="burned LP"
           icon={<HedgeIcon />}
         />
         <StatCard
-          label="Active Spokes"
+          label="memes launched"
           value={spokeCount !== undefined ? spokeCount.toString() : "\u2014"}
+          sub="and counting"
         />
       </div>
 
       <div className="mt-6 grid gap-3 grid-cols-2 lg:grid-cols-3 sm:mt-8 sm:gap-4">
         <StatCard
-          label="HEDGE Total Supply"
+          label="total supply"
           value={`${fmt(totalSupply)}`}
-          sub="1B max"
+          sub="1B max, deflationary"
           icon={<HedgeIcon />}
         />
         <StatCard
-          label="Pending POL Fees"
+          label="pending fees"
           value={`${fmt(accumulatedFees)}`}
-          sub="Waiting for crank"
+          sub="waiting to get cranked"
           icon={<HedgeIcon />}
         />
         <StatCard
-          label="Your HEDGE Balance"
-          value={address ? `${fmt(hedgeBalance)}` : "Connect wallet"}
+          label="ur bag"
+          value={address ? `${fmt(hedgeBalance)}` : "connect wallet ser"}
           icon={address ? <HedgeIcon /> : undefined}
         />
       </div>
 
-      <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 sm:mt-12 sm:p-8">
-        <h2 className="text-xl font-bold text-white">How It Works</h2>
+      <div className="degen-card mt-10 sm:mt-14 !p-6 sm:!p-8">
+        <h2 className="text-xl font-black uppercase tracking-wide text-white">how this works</h2>
+        <p className="mt-1 text-sm text-zinc-600">its not complicated anon</p>
         <div className="mt-6 grid gap-6 sm:grid-cols-3">
           <div>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-violet-600/20 text-violet-400 font-bold">
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-violet-600/30 text-violet-400 font-black text-lg border border-violet-500/20">
               1
             </div>
-            <h3 className="font-semibold text-white">Launch</h3>
-            <p className="mt-1 text-sm text-zinc-400">
-              Pay the toll in $S to create a new meme spoke. 50% buys HEDGE
-              for treasury, 50% becomes permanent LP.
+            <h3 className="font-bold text-white">launch a meme</h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              pay the toll in $S. half buys HEDGE for treasury,
+              half becomes permanent LP. floor goes up.
             </p>
           </div>
           <div>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-violet-600/20 text-violet-400 font-bold">
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-violet-600/30 text-violet-400 font-black text-lg border border-violet-500/20">
               2
             </div>
-            <h3 className="font-semibold text-white">Trade</h3>
-            <p className="mt-1 text-sm text-zinc-400">
-              Buy and sell meme tokens on bonding curves. 1% fee accumulates
-              for POL engine LP burns.
+            <h3 className="font-bold text-white">trade it</h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              buy and sell memes on bonding curves backed by $HEDGE.
+              1% fee feeds the engine. number go up technology.
             </p>
           </div>
           <div>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-violet-600/20 text-violet-400 font-bold">
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-violet-600/30 text-violet-400 font-black text-lg border border-violet-500/20">
               3
             </div>
-            <h3 className="font-semibold text-white">Floor Rises</h3>
-            <p className="mt-1 text-sm text-zinc-400">
-              Every action locks HEDGE permanently. The price floor only goes
-              up &mdash; it&apos;s a liquidity black hole.
+            <h3 className="font-bold text-white">floor rises</h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              every action locks HEDGE permanently. the price floor
+              only goes up. its a liquidity black hole ser.
             </p>
           </div>
         </div>

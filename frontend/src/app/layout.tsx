@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SonicPump — Memetoken Launchpad on Sonic",
+  title: "sonicpump — meme launchpad on sonic",
   description:
-    "Launch and trade meme tokens on Sonic. Every launch hardens the $HEDGE floor. sonicpump.meme",
+    "launch memes. trade memes. every trade hardens the $HEDGE floor. sonicpump.meme",
   icons: {
     icon: "/hedge-48.png",
     apple: "/hedge-192.png",

@@ -24,25 +24,25 @@ function TxStatus({ isPending, isSuccess, error }: {
 }) {
   if (isPending) {
     return (
-      <div className="flex items-center justify-center gap-2 rounded-lg bg-violet-600/10 p-3 text-sm text-violet-400">
+      <div className="flex items-center justify-center gap-2 rounded-lg bg-violet-600/10 p-3 text-sm text-violet-400 border border-violet-500/20">
         <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
-        Waiting for confirmation...
+        waiting for confirmation...
       </div>
     );
   }
   if (isSuccess) {
     return (
-      <div className="rounded-lg bg-green-600/10 p-3 text-center text-sm text-green-400">
-        Transaction confirmed!
+      <div className="rounded-lg bg-green-600/10 p-3 text-center text-sm font-bold text-green-400 border border-green-500/20">
+        tx confirmed. lfg
       </div>
     );
   }
   if (error) {
     return (
-      <div className="rounded-lg bg-red-600/10 p-3 text-sm text-red-400">
+      <div className="rounded-lg bg-red-600/10 p-3 text-sm text-red-400 border border-red-500/20">
         {error.message.slice(0, 200)}
       </div>
     );
@@ -50,7 +50,7 @@ function TxStatus({ isPending, isSuccess, error }: {
   return null;
 }
 
-function SpokeTradePanel() {
+function MemeTradePanel() {
   const { address, isConnected } = useAccount();
   const [spokeId, setSpokeId] = useState("0");
   const [amount, setAmount] = useState("");
@@ -133,41 +133,41 @@ function SpokeTradePanel() {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-6">
+    <div className="degen-card">
       <div className="mb-5 flex gap-2 sm:mb-6">
         <button
           onClick={() => setMode("buy")}
-          className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
+          className={`flex-1 rounded-lg py-2.5 text-sm font-bold uppercase transition-colors ${
             mode === "buy"
-              ? "bg-green-600 text-white"
-              : "bg-zinc-800 text-zinc-400 hover:text-white"
+              ? "bg-green-600 text-white border border-green-500/30"
+              : "bg-zinc-800 text-zinc-500 hover:text-white border border-zinc-700"
           }`}
         >
-          Buy Meme
+          ape in
         </button>
         <button
           onClick={() => setMode("sell")}
-          className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
+          className={`flex-1 rounded-lg py-2.5 text-sm font-bold uppercase transition-colors ${
             mode === "sell"
-              ? "bg-red-600 text-white"
-              : "bg-zinc-800 text-zinc-400 hover:text-white"
+              ? "bg-red-600 text-white border border-red-500/30"
+              : "bg-zinc-800 text-zinc-500 hover:text-white border border-zinc-700"
           }`}
         >
-          Sell Meme
+          dump it
         </button>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm text-zinc-400">
-            Spoke ID
+          <label className="mb-1.5 block text-xs font-bold uppercase text-zinc-500">
+            meme id
           </label>
           <input
             type="number"
             min="0"
             value={spokeId}
             onChange={(e) => setSpokeId(e.target.value)}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+            className="w-full rounded-lg border-2 border-zinc-700 bg-zinc-800 px-4 py-3 text-white font-bold placeholder-zinc-600 focus:border-violet-500 focus:outline-none"
             placeholder="0"
           />
         </div>
@@ -179,23 +179,23 @@ function SpokeTradePanel() {
             <div className="h-8 rounded bg-zinc-700" />
           </div>
         ) : state ? (
-          <div className="grid grid-cols-3 gap-3 rounded-lg bg-zinc-800/50 p-3">
+          <div className="grid grid-cols-3 gap-3 rounded-lg bg-zinc-800/50 p-3 border border-zinc-700">
             <div>
-              <p className="text-xs text-zinc-500">Price</p>
+              <p className="text-xs font-bold uppercase text-zinc-600">price</p>
               <div className="flex items-center gap-1">
                 <HedgeIcon size={14} />
-                <p className="text-sm font-medium text-white">{fmt(spotPrice)}</p>
+                <p className="text-sm font-bold text-white">{fmt(spotPrice)}</p>
               </div>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Supply</p>
-              <p className="text-sm font-medium text-white">
+              <p className="text-xs font-bold uppercase text-zinc-600">supply</p>
+              <p className="text-sm font-bold text-white">
                 {fmt(state.supply)}
               </p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Your Balance</p>
-              <p className="text-sm font-medium text-white">
+              <p className="text-xs font-bold uppercase text-zinc-600">ur bag</p>
+              <p className="text-sm font-bold text-white">
                 {address ? fmt(spokeBalance) : "\u2014"}
               </p>
             </div>
@@ -203,46 +203,46 @@ function SpokeTradePanel() {
         ) : null}
 
         <div>
-          <label className="mb-1.5 block text-sm text-zinc-400">
-            {mode === "buy" ? "Amount (S to spend)" : "Amount (Meme Tokens)"}
+          <label className="mb-1.5 block text-xs font-bold uppercase text-zinc-500">
+            {mode === "buy" ? "amount (S to spend)" : "amount (tokens to dump)"}
           </label>
           <input
             type="text"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+            className="w-full rounded-lg border-2 border-zinc-700 bg-zinc-800 px-4 py-3 text-white font-bold placeholder-zinc-600 focus:border-violet-500 focus:outline-none"
             placeholder="0.0"
           />
         </div>
 
         {!isConnected ? (
-          <p className="text-center text-sm text-zinc-500">
-            Connect your wallet to trade
+          <p className="text-center text-sm font-bold text-zinc-600">
+            connect wallet to trade anon
           </p>
         ) : mode === "sell" ? (
           <div className="flex gap-2">
             <button
               onClick={handleApprove}
               disabled={isPending || !amount}
-              className="flex-1 rounded-lg bg-zinc-700 py-3 text-sm font-semibold text-white hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-lg bg-zinc-700 py-3 text-sm font-bold uppercase text-white hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-50 border border-zinc-600"
             >
-              Approve
+              approve
             </button>
             <button
               onClick={handleSell}
               disabled={isPending || !amount}
-              className="flex-1 rounded-lg bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-lg bg-red-600 py-3 text-sm font-bold uppercase text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 border border-red-500/30"
             >
-              {isPending ? "Confirming..." : "Sell for S"}
+              {isPending ? "confirming..." : "sell for S"}
             </button>
           </div>
         ) : (
           <button
             onClick={handleBuy}
             disabled={isPending || !amount}
-            className="w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg bg-green-600 py-3 text-sm font-bold uppercase text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 border border-green-500/30"
           >
-            {isPending ? "Confirming..." : "Buy with S"}
+            {isPending ? "confirming..." : "buy with S"}
           </button>
         )}
 
@@ -312,43 +312,43 @@ function HubTradePanel() {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 sm:p-6">
+    <div className="degen-card">
       <div className="mb-5 flex gap-2 sm:mb-6">
         <button
           onClick={() => setMode("buy")}
-          className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
+          className={`flex-1 rounded-lg py-2.5 text-sm font-bold uppercase transition-colors ${
             mode === "buy"
-              ? "bg-violet-600 text-white"
-              : "bg-zinc-800 text-zinc-400 hover:text-white"
+              ? "bg-violet-600 text-white border border-violet-500/30"
+              : "bg-zinc-800 text-zinc-500 hover:text-white border border-zinc-700"
           }`}
         >
-          Buy HEDGE
+          buy $hedge
         </button>
         <button
           onClick={() => setMode("sell")}
-          className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
+          className={`flex-1 rounded-lg py-2.5 text-sm font-bold uppercase transition-colors ${
             mode === "sell"
-              ? "bg-orange-600 text-white"
-              : "bg-zinc-800 text-zinc-400 hover:text-white"
+              ? "bg-orange-600 text-white border border-orange-500/30"
+              : "bg-zinc-800 text-zinc-500 hover:text-white border border-zinc-700"
           }`}
         >
-          Sell HEDGE
+          sell $hedge
         </button>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3 rounded-lg bg-zinc-800/50 p-3">
+      <div className="mb-4 grid grid-cols-2 gap-3 rounded-lg bg-zinc-800/50 p-3 border border-zinc-700">
         <div>
-          <p className="text-xs text-zinc-500">Hub Price</p>
+          <p className="text-xs font-bold uppercase text-zinc-600">hub price</p>
           <div className="flex items-center gap-1">
             <HedgeIcon size={14} />
-            <p className="text-sm font-medium text-white">{fmt(hubPrice)} S</p>
+            <p className="text-sm font-bold text-white">{fmt(hubPrice)} S</p>
           </div>
         </div>
         <div>
-          <p className="text-xs text-zinc-500">Your HEDGE</p>
+          <p className="text-xs font-bold uppercase text-zinc-600">ur hedge</p>
           <div className="flex items-center gap-1">
             <HedgeIcon size={14} />
-            <p className="text-sm font-medium text-white">
+            <p className="text-sm font-bold text-white">
               {address ? fmt(hedgeBalance) : "\u2014"}
             </p>
           </div>
@@ -357,46 +357,46 @@ function HubTradePanel() {
 
       <div className="space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm text-zinc-400">
-            {mode === "buy" ? "Amount (S to spend)" : "Amount (HEDGE to sell)"}
+          <label className="mb-1.5 block text-xs font-bold uppercase text-zinc-500">
+            {mode === "buy" ? "amount (S to spend)" : "amount (HEDGE to sell)"}
           </label>
           <input
             type="text"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+            className="w-full rounded-lg border-2 border-zinc-700 bg-zinc-800 px-4 py-3 text-white font-bold placeholder-zinc-600 focus:border-violet-500 focus:outline-none"
             placeholder="0.0"
           />
         </div>
 
         {!isConnected ? (
-          <p className="text-center text-sm text-zinc-500">
-            Connect your wallet to trade
+          <p className="text-center text-sm font-bold text-zinc-600">
+            connect wallet to trade anon
           </p>
         ) : mode === "sell" ? (
           <div className="flex gap-2">
             <button
               onClick={handleApproveHedge}
               disabled={isPending || !amount}
-              className="flex-1 rounded-lg bg-zinc-700 py-3 text-sm font-semibold text-white hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-lg bg-zinc-700 py-3 text-sm font-bold uppercase text-white hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-50 border border-zinc-600"
             >
-              Approve
+              approve
             </button>
             <button
               onClick={handleSellHedge}
               disabled={isPending || !amount}
-              className="flex-1 rounded-lg bg-orange-600 py-3 text-sm font-semibold text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-lg bg-orange-600 py-3 text-sm font-bold uppercase text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50 border border-orange-500/30"
             >
-              {isPending ? "Confirming..." : "Sell HEDGE"}
+              {isPending ? "confirming..." : "sell $hedge"}
             </button>
           </div>
         ) : (
           <button
             onClick={handleBuyHedge}
             disabled={isPending || !amount}
-            className="w-full rounded-lg bg-violet-600 py-3 text-sm font-semibold text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg bg-violet-600 py-3 text-sm font-bold uppercase text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50 border border-violet-500/30"
           >
-            {isPending ? "Confirming..." : "Buy HEDGE with S"}
+            {isPending ? "confirming..." : "buy $hedge with S"}
           </button>
         )}
 
@@ -407,37 +407,37 @@ function HubTradePanel() {
 }
 
 export default function TradePage() {
-  const [tab, setTab] = useState<"spoke" | "hub">("spoke");
+  const [tab, setTab] = useState<"meme" | "hub">("meme");
 
   return (
     <div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
-      <h1 className="mb-6 text-2xl font-bold text-white sm:mb-8 sm:text-3xl">Trade</h1>
+      <h1 className="glow-text mb-6 text-2xl font-black uppercase text-white sm:mb-8 sm:text-3xl">trade</h1>
 
       <div className="mb-5 flex gap-2 sm:mb-6">
         <button
-          onClick={() => setTab("spoke")}
-          className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-            tab === "spoke"
-              ? "bg-zinc-700 text-white"
-              : "text-zinc-400 hover:text-white"
+          onClick={() => setTab("meme")}
+          className={`rounded-lg px-4 py-2 text-sm font-bold uppercase transition-colors ${
+            tab === "meme"
+              ? "bg-zinc-700 text-white border border-zinc-600"
+              : "text-zinc-500 hover:text-white"
           }`}
         >
-          Meme Tokens
+          meme tokens
         </button>
         <button
           onClick={() => setTab("hub")}
-          className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+          className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold uppercase transition-colors ${
             tab === "hub"
-              ? "bg-zinc-700 text-white"
-              : "text-zinc-400 hover:text-white"
+              ? "bg-zinc-700 text-white border border-zinc-600"
+              : "text-zinc-500 hover:text-white"
           }`}
         >
           <HedgeIcon size={16} />
-          HEDGE / S Hub
+          $hedge / S
         </button>
       </div>
 
-      {tab === "spoke" ? <SpokeTradePanel /> : <HubTradePanel />}
+      {tab === "meme" ? <MemeTradePanel /> : <HubTradePanel />}
     </div>
   );
 }
