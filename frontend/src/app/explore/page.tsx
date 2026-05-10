@@ -11,9 +11,7 @@ interface SpokeState {
   hedgeReserve: bigint;
   slope: bigint;
   graduated: boolean;
-  sunset: boolean;
   createdAtBlock: bigint;
-  lastSupplyChangeBlock: bigint;
   creator: `0x${string}`;
 }
 
@@ -71,12 +69,7 @@ function MemeCard({ spokeId }: { spokeId: number }) {
             </div>
           </div>
           <div className="flex gap-2">
-            {state?.sunset && (
-              <span className="rounded-full bg-zinc-600/30 px-2.5 py-1 text-xs font-bold uppercase text-zinc-500 border border-zinc-600/30">
-                rip
-              </span>
-            )}
-            {state?.graduated && !state?.sunset && (
+            {state?.graduated && (
               <span className="rounded-full bg-green-600/30 px-2.5 py-1 text-xs font-bold uppercase text-green-400 border border-green-500/30">
                 graduated
               </span>

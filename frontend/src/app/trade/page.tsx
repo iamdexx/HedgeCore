@@ -71,9 +71,7 @@ function MemeTradePanel() {
         hedgeReserve: bigint;
         slope: bigint;
         graduated: boolean;
-        sunset: boolean;
         createdAtBlock: bigint;
-        lastSupplyChangeBlock: bigint;
         creator: `0x${string}`;
       }
     | undefined;

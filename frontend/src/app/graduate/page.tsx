@@ -11,9 +11,7 @@ interface SpokeState {
   hedgeReserve: bigint;
   slope: bigint;
   graduated: boolean;
-  sunset: boolean;
   createdAtBlock: bigint;
-  lastSupplyChangeBlock: bigint;
   creator: `0x${string}`;
 }
 
@@ -160,7 +158,7 @@ function RisingCard({ spokeId }: { spokeId: number }) {
   const name = info?.[0] || `meme #${spokeId}`;
   const symbol = info?.[1] || "???";
 
-  if (!state || state.graduated || state.sunset) return null;
+  if (!state || state.graduated) return null;
 
   const pct = progressPercent(state.hedgeReserve);
   const hedgeNeeded = GRADUATION_THRESHOLD - state.hedgeReserve;

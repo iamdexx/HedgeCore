@@ -2,9 +2,9 @@
 const ADDRESSES = {
   // Local Anvil deployment
   anvil: {
-    hedgeToken: "0x5fbdb2315678afecb367f032d93f642f64180aa3" as `0x${string}`,
-    hedgehogCore: "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512" as `0x${string}`,
-    hedgehogRouter: "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0" as `0x${string}`,
+    hedgeToken: "0x68B1D87F95878fE05B998F19b66F4baba5De1aed" as `0x${string}`,
+    hedgehogCore: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c" as `0x${string}`,
+    hedgehogRouter: "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d" as `0x${string}`,
   },
   // Sonic testnet — update after testnet deployment
   testnet: {
@@ -322,15 +322,7 @@ export const HEDGEHOG_CORE_ABI = [
             "type": "bool"
           },
           {
-            "name": "sunset",
-            "type": "bool"
-          },
-          {
             "name": "createdAtBlock",
-            "type": "uint64"
-          },
-          {
-            "name": "lastSupplyChangeBlock",
             "type": "uint64"
           },
           {
