@@ -46,6 +46,19 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
     uint256 public hubK; // invariant k = reserveS * reserveHedge
 
     // -------------------------------------------------------------------------
+    //  ERC20 Hub Pools (HEDGE / <quoteToken> constant-product AMMs)
+    // -------------------------------------------------------------------------
+
+    struct ERC20HubPool {
+        uint256 reserveQuote; // ERC20 quote token balance
+        uint256 reserveHedge; // HEDGE balance in this pool
+        uint256 k; // invariant
+    }
+
+    mapping(address => ERC20HubPool) public erc20Pools;
+    address[] public erc20PoolTokens; // registered quote tokens
+
+    // -------------------------------------------------------------------------
     //  Spoke State
     // -------------------------------------------------------------------------
 
@@ -101,6 +114,9 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
 
     TWAPOracle.OracleState internal _oracle;
 
+    // Per-pool TWAP oracles for ERC20 hub pools
+    mapping(address => TWAPOracle.OracleState) internal _erc20Oracles;
+
     // -------------------------------------------------------------------------
     //  Constructor
     // -------------------------------------------------------------------------
@@ -133,7 +149,95 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
     }
 
     // -------------------------------------------------------------------------
-    //  Hub Pool — Swap
+    //  ERC20 Hub Pool — Initialize
+    // -------------------------------------------------------------------------
+
+    /// @notice Seed an ERC20 hub pool with initial liquidity. Called once per token.
+    /// @param quoteToken The ERC20 token to pair with HEDGE.
+    /// @param hedgeAmount Amount of HEDGE to deposit (must be pre-approved).
+    /// @param quoteAmount Amount of ERC20 to deposit (must be pre-approved).
+    function initializeERC20Hub(address quoteToken, uint256 hedgeAmount, uint256 quoteAmount)
+        external
+        onlyOwner
+    {
+        ERC20HubPool storage pool = erc20Pools[quoteToken];
+        if (pool.k != 0) revert PoolAlreadyInitialized();
+        require(quoteToken != address(0) && hedgeAmount > 0 && quoteAmount > 0, "Invalid params");
+
+        SafeTransferLib.safeTransferFrom(address(hedgeToken), msg.sender, address(this), hedgeAmount);
+        SafeTransferLib.safeTransferFrom(quoteToken, msg.sender, address(this), quoteAmount);
+
+        pool.reserveQuote = quoteAmount;
+        pool.reserveHedge = hedgeAmount;
+        pool.k = quoteAmount * hedgeAmount;
+
+        erc20PoolTokens.push(quoteToken);
+
+        _erc20Oracles[quoteToken].write(hedgeAmount.divWad(quoteAmount));
+
+        emit ERC20HubInitialized(quoteToken, hedgeAmount, quoteAmount);
+    }
+
+    // -------------------------------------------------------------------------
+    //  ERC20 Hub Pool — Swap
+    // -------------------------------------------------------------------------
+
+    /// @notice Buy HEDGE with an ERC20 quote token.
+    /// @param quoteToken The ERC20 to spend.
+    /// @param quoteAmount Amount of ERC20 to spend (must be pre-approved).
+    /// @param minHedgeOut Minimum HEDGE to receive.
+    function hubBuyHedgeERC20(address quoteToken, uint256 quoteAmount, uint256 minHedgeOut)
+        external
+        nonReentrant
+    {
+        if (quoteAmount == 0) revert ZeroAmount();
+        ERC20HubPool storage pool = erc20Pools[quoteToken];
+        if (pool.k == 0) revert PoolNotInitialized();
+
+        uint256 hedgeOut = _getHubAmountOut(quoteAmount, pool.reserveQuote, pool.reserveHedge);
+        if (hedgeOut < minHedgeOut) revert SlippageExceeded();
+
+        SafeTransferLib.safeTransferFrom(quoteToken, msg.sender, address(this), quoteAmount);
+
+        pool.reserveQuote += quoteAmount;
+        pool.reserveHedge -= hedgeOut;
+
+        SafeTransferLib.safeTransfer(address(hedgeToken), msg.sender, hedgeOut);
+        _erc20Oracles[quoteToken].write(pool.reserveHedge.divWad(pool.reserveQuote));
+
+        emit ERC20HubSwap(quoteToken, msg.sender, true, quoteAmount, hedgeOut);
+    }
+
+    /// @notice Sell HEDGE for an ERC20 quote token.
+    /// @param quoteToken The ERC20 to receive.
+    /// @param hedgeAmount Amount of HEDGE to sell.
+    /// @param minQuoteOut Minimum ERC20 to receive.
+    function hubSellHedgeERC20(address quoteToken, uint256 hedgeAmount, uint256 minQuoteOut)
+        external
+        nonReentrant
+    {
+        if (hedgeAmount == 0) revert ZeroAmount();
+        ERC20HubPool storage pool = erc20Pools[quoteToken];
+        if (pool.k == 0) revert PoolNotInitialized();
+
+        uint256 quoteOut = _getHubAmountOut(hedgeAmount, pool.reserveHedge, pool.reserveQuote);
+        if (quoteOut < minQuoteOut) revert SlippageExceeded();
+
+        SafeTransferLib.safeTransferFrom(
+            address(hedgeToken), msg.sender, address(this), hedgeAmount
+        );
+
+        pool.reserveHedge += hedgeAmount;
+        pool.reserveQuote -= quoteOut;
+
+        SafeTransferLib.safeTransfer(quoteToken, msg.sender, quoteOut);
+        _erc20Oracles[quoteToken].write(pool.reserveHedge.divWad(pool.reserveQuote));
+
+        emit ERC20HubSwap(quoteToken, msg.sender, false, hedgeAmount, quoteOut);
+    }
+
+    // -------------------------------------------------------------------------
+    //  Hub Pool — Swap (Native S)
     // -------------------------------------------------------------------------
 
     /// @notice Buy HEDGE with native S via the hub AMM.
@@ -381,16 +485,17 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
     }
 
     // -------------------------------------------------------------------------
-    //  POL Engine — Burn accumulated fees into hub LP
+    //  POL Engine — Burn accumulated fees into hub LP (50/50 across all pools)
     // -------------------------------------------------------------------------
 
-    /// @notice Cranks the POL engine: uses accumulated HEDGE fees to add
-    ///         permanent liquidity to the hub pool. Anyone can call this.
+    /// @notice Cranks the POL engine: splits accumulated HEDGE fees equally
+    ///         across the native S pool and all registered ERC20 pools, adding
+    ///         permanent liquidity to each. Anyone can call this.
     function crankPOL() external nonReentrant {
         uint256 fees = accumulatedFees;
         require(fees > 0, "No fees");
 
-        // TWAP safety check: refuse if spot is >10% above TWAP
+        // TWAP safety check on S pool: refuse if spot is >10% above TWAP
         uint256 twap = _oracle.consult(1800);
         if (twap > 0) {
             uint256 spot = hubReserveHedge.divWad(hubReserveS);
@@ -400,16 +505,33 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
 
         accumulatedFees = 0;
 
-        // Sell half the HEDGE fees for S via the hub pool
-        uint256 hedgeToSell = fees / 2;
+        // Count total pools (1 native S + N ERC20 pools)
+        uint256 numErc20Pools = erc20PoolTokens.length;
+        uint256 totalPools = 1 + numErc20Pools;
+        uint256 feesPerPool = fees / totalPools;
+
+        // --- Native S Pool ---
+        _crankSPool(feesPerPool);
+
+        // --- ERC20 Pools ---
+        for (uint256 i; i < numErc20Pools; ++i) {
+            _crankERC20Pool(erc20PoolTokens[i], feesPerPool);
+        }
+    }
+
+    /// @dev Add permanent LP to the native S hub pool from HEDGE fees.
+    function _crankSPool(uint256 hedgeFees) internal {
+        if (hedgeFees == 0) return;
+
+        // Sell half the HEDGE for S via the hub pool
+        uint256 hedgeToSell = hedgeFees / 2;
         uint256 sOut = _getHubAmountOut(hedgeToSell, hubReserveHedge, hubReserveS);
 
         hubReserveHedge += hedgeToSell;
         hubReserveS -= sOut;
 
         // Add remaining HEDGE + acquired S as permanent liquidity
-        uint256 hedgeForLp = fees - hedgeToSell;
-        // Scale hedgeForLp down to match the S ratio
+        uint256 hedgeForLp = hedgeFees - hedgeToSell;
         uint256 hedgeNeeded = sOut.mulWad(hubReserveHedge.divWad(hubReserveS));
         if (hedgeNeeded < hedgeForLp) {
             hedgeForLp = hedgeNeeded;
@@ -421,7 +543,36 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
 
         _oracle.write(hubReserveHedge.divWad(hubReserveS));
 
-        emit POLBurn(fees, sOut);
+        emit POLBurn(hedgeFees, sOut);
+    }
+
+    /// @dev Add permanent LP to an ERC20 hub pool from HEDGE fees.
+    function _crankERC20Pool(address quoteToken, uint256 hedgeFees) internal {
+        if (hedgeFees == 0) return;
+        ERC20HubPool storage pool = erc20Pools[quoteToken];
+        if (pool.k == 0) return;
+
+        // Sell half the HEDGE for quote token via the ERC20 pool
+        uint256 hedgeToSell = hedgeFees / 2;
+        uint256 quoteOut = _getHubAmountOut(hedgeToSell, pool.reserveHedge, pool.reserveQuote);
+
+        pool.reserveHedge += hedgeToSell;
+        pool.reserveQuote -= quoteOut;
+
+        // Add remaining HEDGE + acquired quote as permanent liquidity
+        uint256 hedgeForLp = hedgeFees - hedgeToSell;
+        uint256 hedgeNeeded = quoteOut.mulWad(pool.reserveHedge.divWad(pool.reserveQuote));
+        if (hedgeNeeded < hedgeForLp) {
+            hedgeForLp = hedgeNeeded;
+        }
+
+        pool.reserveQuote += quoteOut;
+        pool.reserveHedge += hedgeForLp;
+        pool.k = pool.reserveQuote * pool.reserveHedge;
+
+        _erc20Oracles[quoteToken].write(pool.reserveHedge.divWad(pool.reserveQuote));
+
+        emit POLBurn(hedgeFees, quoteOut);
     }
 
     // -------------------------------------------------------------------------
@@ -488,6 +639,29 @@ contract HedgehogCore is IHedgehogCore, Ownable, ReentrancyGuard {
     function getHubPrice() external view returns (uint256) {
         if (hubReserveS == 0) return 0;
         return hubReserveHedge.divWad(hubReserveS);
+    }
+
+    function getERC20HubPrice(address quoteToken) external view returns (uint256) {
+        ERC20HubPool storage pool = erc20Pools[quoteToken];
+        if (pool.reserveQuote == 0) return 0;
+        return pool.reserveHedge.divWad(pool.reserveQuote);
+    }
+
+    function getERC20HubPool(address quoteToken)
+        external
+        view
+        returns (uint256 reserveQuote, uint256 reserveHedge, uint256 k)
+    {
+        ERC20HubPool storage pool = erc20Pools[quoteToken];
+        return (pool.reserveQuote, pool.reserveHedge, pool.k);
+    }
+
+    function getERC20PoolTokens() external view returns (address[] memory) {
+        return erc20PoolTokens;
+    }
+
+    function getERC20HubTWAP(address quoteToken) external view returns (uint256) {
+        return _erc20Oracles[quoteToken].consult(1800);
     }
 
     function getTWAP() external view returns (uint256) {
