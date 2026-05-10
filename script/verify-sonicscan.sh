@@ -1,6 +1,6 @@
 #!/bin/bash
 # Verify all Hedgehog Protocol contracts on SonicScan
-# Usage: SONICSCAN_API_KEY=<key> ./script/verify-sonicscan.sh <hedge_token> <hedgehog_core> <hedgehog_router> [treasury_address]
+# Usage: SONICSCAN_API_KEY=<key> ./script/verify-sonicscan.sh <hedge_token> <hedgehog_core> <hedgehog_router> <owner> <treasury>
 #
 # Requirements:
 #   - forge installed
@@ -17,10 +17,11 @@ if [ -z "${SONICSCAN_API_KEY:-}" ]; then
   exit 1
 fi
 
-HEDGE_TOKEN="${1:?Usage: $0 <hedge_token> <hedgehog_core> <hedgehog_router> [treasury]}"
+HEDGE_TOKEN="${1:?Usage: $0 <hedge_token> <hedgehog_core> <hedgehog_router> <owner> <treasury>}"
 HEDGEHOG_CORE="${2:?}"
 HEDGEHOG_ROUTER="${3:?}"
-TREASURY="${4:-0x0000000000000000000000000000000000000000}"
+OWNER="${4:?}"
+TREASURY="${5:?}"
 
 # Etherscan V2 API endpoint for Sonic (chain ID 146)
 VERIFIER_URL="https://api.etherscan.io/v2/api?chainid=146"
@@ -29,6 +30,8 @@ echo "=== Verifying Hedgehog Protocol on SonicScan ==="
 echo "HedgeToken:      $HEDGE_TOKEN"
 echo "HedgehogCore:    $HEDGEHOG_CORE"
 echo "HedgehogRouter:  $HEDGEHOG_ROUTER"
+echo "Owner:           $OWNER"
+echo "Treasury:        $TREASURY"
 echo ""
 
 echo "[1/3] Verifying HedgeToken..."
@@ -36,6 +39,7 @@ forge verify-contract "$HEDGE_TOKEN" \
   src/core/HedgeToken.sol:HedgeToken \
   --verifier-url "$VERIFIER_URL" \
   --etherscan-api-key "$SONICSCAN_API_KEY" \
+  --constructor-args "$(cast abi-encode 'constructor(address)' "$OWNER")" \
   --watch || echo "  (may already be verified)"
 
 echo ""
@@ -44,7 +48,7 @@ forge verify-contract "$HEDGEHOG_CORE" \
   src/core/HedgehogCore.sol:HedgehogCore \
   --verifier-url "$VERIFIER_URL" \
   --etherscan-api-key "$SONICSCAN_API_KEY" \
-  --constructor-args "$(cast abi-encode 'constructor(address,address)' "$HEDGE_TOKEN" "$TREASURY")" \
+  --constructor-args "$(cast abi-encode 'constructor(address,address,address)' "$OWNER" "$TREASURY" "$HEDGE_TOKEN")" \
   --watch || echo "  (may already be verified)"
 
 echo ""
@@ -53,7 +57,7 @@ forge verify-contract "$HEDGEHOG_ROUTER" \
   src/periphery/HedgehogRouter.sol:HedgehogRouter \
   --verifier-url "$VERIFIER_URL" \
   --etherscan-api-key "$SONICSCAN_API_KEY" \
-  --constructor-args "$(cast abi-encode 'constructor(address)' "$HEDGEHOG_CORE")" \
+  --constructor-args "$(cast abi-encode 'constructor(address,address)' "$HEDGEHOG_CORE" "$HEDGE_TOKEN")" \
   --watch || echo "  (may already be verified)"
 
 echo ""

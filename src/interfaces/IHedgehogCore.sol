@@ -52,6 +52,16 @@ interface IHedgehogCore {
 
     event HubSwap(address indexed trader, bool isBuyHedge, uint256 amountIn, uint256 amountOut);
 
+    event ERC20HubSwap(
+        address indexed quoteToken,
+        address indexed trader,
+        bool isBuyHedge,
+        uint256 amountIn,
+        uint256 amountOut
+    );
+
+    event ERC20HubInitialized(address indexed quoteToken, uint256 hedgeAmount, uint256 quoteAmount);
+
     event POLBurn(uint256 hedgeBurned, uint256 sLpBurned);
 
     event SpokeTransfer(
@@ -96,6 +106,8 @@ interface IHedgehogCore {
     error SpokeAlreadySunset();
     error SpokeNotAtFloor();
     error SunsetTooEarly();
+    error PoolNotInitialized();
+    error PoolAlreadyInitialized();
 
     // --- Core Functions ---
 
@@ -120,6 +132,10 @@ interface IHedgehogCore {
 
     function hubSellHedge(uint256 hedgeAmount, uint256 minSOut) external;
 
+    function hubBuyHedgeERC20(address quoteToken, uint256 quoteAmount, uint256 minHedgeOut) external;
+
+    function hubSellHedgeERC20(address quoteToken, uint256 hedgeAmount, uint256 minQuoteOut) external;
+
     function sunsetSpoke(uint256 spokeId) external;
 
     // --- View Functions ---
@@ -131,6 +147,8 @@ interface IHedgehogCore {
     function getSpotPrice(uint256 spokeId) external view returns (uint256);
 
     function getHubPrice() external view returns (uint256);
+
+    function getERC20HubPrice(address quoteToken) external view returns (uint256);
 
     function getTWAP() external view returns (uint256);
 
