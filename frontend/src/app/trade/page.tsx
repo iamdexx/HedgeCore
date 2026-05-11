@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useAccount, useWriteContract, useReadContract } from "wagmi";
+import { useAccount, useWriteContract, useReadContract, useBalance } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import {
   CONTRACTS,
@@ -56,6 +56,16 @@ function MemeTradePanel() {
   const [amount, setAmount] = useState("");
   const [mode, setMode] = useState<"buy" | "sell">("buy");
   const { writeContract, isPending, isSuccess, error } = useWriteContract();
+
+  const { data: nativeBalance } = useBalance({ address });
+
+  const { data: rawHedgeBalance } = useReadContract({
+    address: CONTRACTS.hedgeToken,
+    abi: HEDGE_TOKEN_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+  });
+  const hedgeBalance = rawHedgeBalance as bigint | undefined;
 
   const spokeIdBigInt = BigInt(spokeId || "0");
 
@@ -132,6 +142,29 @@ function MemeTradePanel() {
 
   return (
     <div className="degen-card">
+      {/* wallet balances */}
+      {isConnected && (
+        <div className="mb-4 grid grid-cols-3 gap-2 rounded-lg bg-zinc-800/50 p-3 border border-zinc-700">
+          <div>
+            <p className="text-xs font-bold uppercase text-zinc-600">ur S</p>
+            <p className="text-sm font-bold text-white">
+              {nativeBalance ? Number(formatEther(nativeBalance.value)).toLocaleString(undefined, { maximumFractionDigits: 4 }) : "\u2014"}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase text-zinc-600">ur HEDGE</p>
+            <div className="flex items-center gap-1">
+              <HedgeIcon size={12} />
+              <p className="text-sm font-bold text-white">{fmt(hedgeBalance)}</p>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase text-zinc-600">ur bag</p>
+            <p className="text-sm font-bold text-white">{fmt(spokeBalance)}</p>
+          </div>
+        </div>
+      )}
+
       <div className="mb-5 flex gap-2 sm:mb-6">
         <button
           onClick={() => setMode("buy")}
@@ -192,10 +225,13 @@ function MemeTradePanel() {
               </p>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase text-zinc-600">ur bag</p>
-              <p className="text-sm font-bold text-white">
-                {address ? fmt(spokeBalance) : "\u2014"}
-              </p>
+              <p className="text-xs font-bold uppercase text-zinc-600">reserve</p>
+              <div className="flex items-center gap-1">
+                <HedgeIcon size={12} />
+                <p className="text-sm font-bold text-white">
+                  {fmt(state.hedgeReserve)}
+                </p>
+              </div>
             </div>
           </div>
         ) : null}
@@ -255,6 +291,8 @@ function HubTradePanel() {
   const [amount, setAmount] = useState("");
   const [mode, setMode] = useState<"buy" | "sell">("buy");
   const { writeContract, isPending, isSuccess, error } = useWriteContract();
+
+  const { data: nativeBalance } = useBalance({ address });
 
   const { data: rawHubPrice } = useReadContract({
     address: CONTRACTS.hedgehogCore,
@@ -342,13 +380,19 @@ function HubTradePanel() {
         </button>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3 rounded-lg bg-zinc-800/50 p-3 border border-zinc-700">
+      <div className="mb-4 grid grid-cols-3 gap-2 rounded-lg bg-zinc-800/50 p-3 border border-zinc-700">
         <div>
           <p className="text-xs font-bold uppercase text-zinc-600">1 hedge</p>
           <div className="flex items-center gap-1">
             <HedgeIcon size={14} />
             <p className="text-sm font-bold text-white">{fmtPricePerHedge(hubPrice)} S</p>
           </div>
+        </div>
+        <div>
+          <p className="text-xs font-bold uppercase text-zinc-600">ur S</p>
+          <p className="text-sm font-bold text-white">
+            {address && nativeBalance ? Number(formatEther(nativeBalance.value)).toLocaleString(undefined, { maximumFractionDigits: 4 }) : "\u2014"}
+          </p>
         </div>
         <div>
           <p className="text-xs font-bold uppercase text-zinc-600">ur hedge</p>
