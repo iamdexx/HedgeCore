@@ -9,6 +9,7 @@ import {
   HEDGEHOG_ROUTER_ABI,
   HEDGEHOG_CORE_ABI,
   HEDGE_TOKEN_ABI,
+  COMBO_WRAPPER_ABI,
 } from "@/config/contracts";
 
 function HedgeIcon({ size = 16 }: { size?: number }) {
@@ -112,10 +113,10 @@ function MemeTradePanel() {
   function handleBuy() {
     if (!amount) return;
     writeContract({
-      address: CONTRACTS.hedgehogRouter,
-      abi: HEDGEHOG_ROUTER_ABI,
+      address: CONTRACTS.comboWrapper,
+      abi: COMBO_WRAPPER_ABI,
       functionName: "buyMemeWithS",
-      args: [spokeIdBigInt, BigInt(0)],
+      args: [spokeIdBigInt, BigInt(0), "0x0000000000000000000000000000000000000000"],
       value: parseEther(amount),
     });
   }
@@ -123,20 +124,23 @@ function MemeTradePanel() {
   function handleSell() {
     if (!amount) return;
     writeContract({
-      address: CONTRACTS.hedgehogRouter,
-      abi: HEDGEHOG_ROUTER_ABI,
+      address: CONTRACTS.comboWrapper,
+      abi: COMBO_WRAPPER_ABI,
       functionName: "sellMemeForS",
       args: [spokeIdBigInt, parseEther(amount), BigInt(0)],
     });
   }
 
   function handleApprove() {
+    // No longer needed — ComboWrapper burns ERC-20 directly from caller
+    // (user must approve the SpokeToken to the ComboWrapper for sells)
     if (!amount) return;
+    // For sells, approve the spoke ERC-20 token to the ComboWrapper
     writeContract({
-      address: CONTRACTS.hedgehogCore,
-      abi: HEDGEHOG_CORE_ABI,
-      functionName: "spokeApprove",
-      args: [spokeIdBigInt, CONTRACTS.hedgehogRouter, parseEther(amount)],
+      address: CONTRACTS.hedgeToken,
+      abi: HEDGE_TOKEN_ABI,
+      functionName: "approve",
+      args: [CONTRACTS.comboWrapper, parseEther(amount)],
     });
   }
 

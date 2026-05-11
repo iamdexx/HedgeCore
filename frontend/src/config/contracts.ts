@@ -5,6 +5,8 @@ const ADDRESSES = {
     hedgeToken: "0x68B1D87F95878fE05B998F19b66F4baba5De1aed" as `0x${string}`,
     hedgehogCore: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c" as `0x${string}`,
     hedgehogRouter: "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d" as `0x${string}`,
+    spokeWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    comboWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     usdc: "0x0000000000000000000000000000000000000000" as `0x${string}`,
   },
   // Sonic testnet — update after testnet deployment
@@ -12,6 +14,8 @@ const ADDRESSES = {
     hedgeToken: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     hedgehogCore: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     hedgehogRouter: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    spokeWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    comboWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     usdc: "0x0000000000000000000000000000000000000000" as `0x${string}`,
   },
   // Sonic mainnet — deployed 2026-05-10
@@ -19,6 +23,8 @@ const ADDRESSES = {
     hedgeToken: "0x5cccEbCb0C0af721a6539aFDa1628EeaAF7d6C5c" as `0x${string}`,
     hedgehogCore: "0x985A53B9b82eF766E69FD7DA49E4D53e1A13a27e" as `0x${string}`,
     hedgehogRouter: "0xB09fb21bA329F3318101A9C6C454080b6D2abbB2" as `0x${string}`,
+    spokeWrapper: "0x77223fed0c1e1148fA3FB3f315BDB519ff5107C1" as `0x${string}`,
+    comboWrapper: "0xc931DD1e5eD9B59568DF50372701374706Bdbc60" as `0x${string}`,
     usdc: "0x29219dd400f2Bf60E5a23d13Be72B486D4038894" as `0x${string}`,
   },
 } as const;
@@ -1890,6 +1896,200 @@ export const HEDGEHOG_ROUTER_ABI = [
   {
     "type": "error",
     "name": "ZeroAmount",
+    "inputs": []
+  }
+] as const;
+
+export const COMBO_WRAPPER_ABI = [
+  {
+    "type": "function",
+    "name": "launchSpoke",
+    "inputs": [
+      {
+        "name": "config",
+        "type": "tuple",
+        "components": [
+          { "name": "name", "type": "string" },
+          { "name": "symbol", "type": "string" },
+          { "name": "slope", "type": "uint256" },
+          { "name": "metadataURI", "type": "string" },
+          { "name": "referralEnabled", "type": "bool" },
+          { "name": "referralBps", "type": "uint256" },
+          { "name": "vestingEnabled", "type": "bool" },
+          { "name": "vestingDuration", "type": "uint256" }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "spokeBuy",
+    "inputs": [
+      { "name": "spokeId", "type": "uint256" },
+      { "name": "hedgeAmount", "type": "uint256" },
+      { "name": "minTokensOut", "type": "uint256" },
+      { "name": "referrer", "type": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "buyMemeWithS",
+    "inputs": [
+      { "name": "spokeId", "type": "uint256" },
+      { "name": "minTokensOut", "type": "uint256" },
+      { "name": "referrer", "type": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "spokeSell",
+    "inputs": [
+      { "name": "spokeId", "type": "uint256" },
+      { "name": "tokenAmount", "type": "uint256" },
+      { "name": "minHedgeOut", "type": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "sellMemeForS",
+    "inputs": [
+      { "name": "spokeId", "type": "uint256" },
+      { "name": "tokenAmount", "type": "uint256" },
+      { "name": "minSOut", "type": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getSpokeToken",
+    "inputs": [{ "name": "spokeId", "type": "uint256" }],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getSpokeBalance",
+    "inputs": [
+      { "name": "spokeId", "type": "uint256" },
+      { "name": "account", "type": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "spokeTokens",
+    "inputs": [{ "name": "spokeId", "type": "uint256" }],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "spokeFeatures",
+    "inputs": [{ "name": "spokeId", "type": "uint256" }],
+    "outputs": [
+      { "name": "referralEnabled", "type": "bool" },
+      { "name": "referralBps", "type": "uint256" },
+      { "name": "vestingEnabled", "type": "bool" },
+      { "name": "vestingDuration", "type": "uint256" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isVested",
+    "inputs": [
+      { "name": "spokeId", "type": "uint256" },
+      { "name": "account", "type": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getVestingUnlock",
+    "inputs": [
+      { "name": "spokeId", "type": "uint256" },
+      { "name": "account", "type": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "core",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "hedgeToken",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "SpokeTokenDeployed",
+    "inputs": [
+      { "name": "spokeId", "type": "uint256", "indexed": true },
+      { "name": "token", "type": "address", "indexed": true },
+      { "name": "name", "type": "string", "indexed": false },
+      { "name": "symbol", "type": "string", "indexed": false },
+      { "name": "referralEnabled", "type": "bool", "indexed": false },
+      { "name": "vestingEnabled", "type": "bool", "indexed": false }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "ReferralPaid",
+    "inputs": [
+      { "name": "spokeId", "type": "uint256", "indexed": true },
+      { "name": "referrer", "type": "address", "indexed": true },
+      { "name": "buyer", "type": "address", "indexed": true },
+      { "name": "amount", "type": "uint256", "indexed": false }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "SpokeNotWrapped",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OnlyOwner",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "BpsTooHigh",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "VestingTooLong",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "TokensLocked",
     "inputs": []
   }
 ] as const;
