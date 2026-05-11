@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { formatEther } from "viem";
-import { CONTRACTS, HEDGEHOG_CORE_ABI } from "@/config/contracts";
+import { CONTRACTS, HEDGEHOG_CORE_ABI, COMBO_WRAPPER_ABI } from "@/config/contracts";
 import { ImageUpload } from "@/components/ImageUpload";
 import { uploadJsonToIPFS, hasPinataConfig } from "@/lib/ipfs";
 
@@ -29,7 +29,7 @@ function TxStatus({ isPending, isSuccess, error }: {
   if (isSuccess) {
     return (
       <div className="rounded-lg bg-green-600/10 p-3 text-center text-sm font-bold text-green-400 border border-green-500/20">
-        meme launched. go check explore. lfg
+        meme launched. real ERC-20 deployed. go check explore. lfg
       </div>
     );
   }
@@ -43,6 +43,28 @@ function TxStatus({ isPending, isSuccess, error }: {
   return null;
 }
 
+function FeatureCheckbox({ checked, onChange, label, description }: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  description: string;
+}) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-zinc-700 bg-zinc-800/50 p-3 hover:border-violet-500/50 transition-colors">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-600 bg-zinc-700 text-violet-500 focus:ring-violet-500 accent-violet-500"
+      />
+      <div>
+        <span className="text-sm font-bold text-white">{label}</span>
+        <p className="text-xs text-zinc-500">{description}</p>
+      </div>
+    </label>
+  );
+}
+
 export default function LaunchPage() {
   const { isConnected } = useAccount();
   const [name, setName] = useState("");
@@ -54,6 +76,12 @@ export default function LaunchPage() {
   const [github, setGithub] = useState("");
   const [slope, setSlope] = useState(DEFAULT_SLOPE);
   const [buildingMetadata, setBuildingMetadata] = useState(false);
+
+  // Feature toggles
+  const [referralEnabled, setReferralEnabled] = useState(false);
+  const [referralBps, setReferralBps] = useState("200"); // 2% default
+  const [vestingEnabled, setVestingEnabled] = useState(false);
+  const [vestingDays, setVestingDays] = useState("7"); // 7 days default
 
   const { writeContract, isPending, isSuccess, error } = useWriteContract();
 
@@ -95,9 +123,12 @@ export default function LaunchPage() {
       }
     }
 
+    const vestingDuration = vestingEnabled ? BigInt(parseInt(vestingDays) * 86400) : BigInt(0);
+    const refBps = referralEnabled ? BigInt(parseInt(referralBps)) : BigInt(0);
+
     writeContract({
-      address: CONTRACTS.hedgehogCore,
-      abi: HEDGEHOG_CORE_ABI,
+      address: CONTRACTS.comboWrapper,
+      abi: COMBO_WRAPPER_ABI,
       functionName: "launchSpoke",
       args: [
         {
@@ -105,6 +136,10 @@ export default function LaunchPage() {
           symbol: symbol.toUpperCase(),
           slope: BigInt(slope),
           metadataURI,
+          referralEnabled,
+          referralBps: refBps,
+          vestingEnabled,
+          vestingDuration,
         },
       ],
       value: tollAmount ?? BigInt(0),
@@ -119,7 +154,7 @@ export default function LaunchPage() {
         launch a meme
       </h1>
       <p className="mb-6 text-zinc-500 sm:mb-8">
-        create a new meme token backed by{" "}
+        create a real ERC-20 token backed by{" "}
         <span className="inline-flex items-center gap-1">
           <Image src="/hedge-48.png" alt="" width={16} height={16} className="inline rounded-full" />
           <span className="font-bold text-white">$HEDGE</span>
@@ -128,7 +163,7 @@ export default function LaunchPage() {
         <span className="font-bold text-white">
           {tollLoading ? "..." : tollAmount ? formatEther(tollAmount) : "\u2014"} $S
         </span>
-        . lets go.
+        . pick ur features.
       </p>
 
       <div className="degen-card !p-5 sm:!p-6">
@@ -222,6 +257,55 @@ export default function LaunchPage() {
             </div>
           </div>
 
+          {/* Token features */}
+          <div className="border-t border-zinc-800 pt-4">
+            <p className="mb-3 text-xs font-bold uppercase text-zinc-500">
+              token features <span className="text-zinc-700">(pick ur power-ups)</span>
+            </p>
+            <div className="space-y-2">
+              <FeatureCheckbox
+                checked={referralEnabled}
+                onChange={setReferralEnabled}
+                label="Referral Rewards"
+                description="Referrers earn a % of meme tokens when their link gets used"
+              />
+              {referralEnabled && (
+                <div className="ml-7 flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    max="5"
+                    step="0.5"
+                    value={(parseInt(referralBps) / 100).toString()}
+                    onChange={(e) => setReferralBps((parseFloat(e.target.value) * 100).toString())}
+                    className="w-20 rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                  <span className="text-xs text-zinc-500">% referral cut (max 5%)</span>
+                </div>
+              )}
+
+              <FeatureCheckbox
+                checked={vestingEnabled}
+                onChange={setVestingEnabled}
+                label="Vesting Lock"
+                description="Buyers' tokens locked for X days after purchase (anti-dump)"
+              />
+              {vestingEnabled && (
+                <div className="ml-7 flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={vestingDays}
+                    onChange={(e) => setVestingDays(e.target.value)}
+                    className="w-20 rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-white focus:border-violet-500 focus:outline-none"
+                  />
+                  <span className="text-xs text-zinc-500">days lock (max 30)</span>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div>
             <label className="mb-1.5 block text-xs font-bold uppercase text-zinc-500">
               curve slope{" "}
@@ -271,11 +355,11 @@ export default function LaunchPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-violet-600/30 text-xs font-black text-violet-400 border border-violet-500/20">2</span>
-            50% is swapped to $HEDGE and sent to treasury
+            a real ERC-20 token is deployed (shows up in MetaMask)
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-violet-600/30 text-xs font-black text-violet-400 border border-violet-500/20">3</span>
-            50% becomes permanent LP (burned forever)
+            50% toll → treasury HEDGE, 50% → permanent LP (burned forever)
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-violet-600/30 text-xs font-black text-violet-400 border border-violet-500/20">4</span>
@@ -283,7 +367,7 @@ export default function LaunchPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-violet-600/30 text-xs font-black text-violet-400 border border-violet-500/20">5</span>
-            anyone can now trade ur token for $HEDGE. lfg
+            features (referral, vesting) are locked per token at launch
           </li>
         </ul>
       </div>
