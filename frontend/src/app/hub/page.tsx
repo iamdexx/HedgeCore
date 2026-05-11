@@ -300,6 +300,71 @@ export default function HubPage() {
           </div>
         </div>
       </div>
+
+      {/* bonding curve breakdown */}
+      <div className="degen-card mt-6 !p-6 sm:!p-8">
+        <h2 className="text-xl font-black uppercase tracking-wide text-white">wtf is the curve</h2>
+        <p className="mt-1 text-sm text-zinc-600">number go up math. let us explain.</p>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-violet-400">price go up</p>
+            <p className="mt-2 font-mono text-lg text-white">price = slope x supply</p>
+            <p className="mt-2 text-xs text-zinc-500">
+              more apes buy = price pumps. simple as.
+              every buy pushes the line up. every sell drops it. no rugs, just math.
+            </p>
+          </div>
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-violet-400">funds are safu</p>
+            <p className="mt-2 font-mono text-lg text-white">reserve = slope/2 x supply²</p>
+            <p className="mt-2 text-xs text-zinc-500">
+              every token you hold is backed by HEDGE locked on-chain. 
+              2x the supply = 4x the reserves locked. quadratic bag energy.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-green-400">ape in, get tokens, simple</p>
+          <div className="mt-3 flex items-center justify-center gap-2 text-sm text-zinc-400 flex-wrap">
+            <span className="rounded bg-zinc-800 px-2 py-1 text-white font-bold">S in</span>
+            <span className="text-zinc-600">{"->"}</span>
+            <span className="rounded bg-zinc-800 px-2 py-1 text-white font-bold">hub swaps to HEDGE</span>
+            <span className="text-zinc-600">{"->"}</span>
+            <span className="rounded bg-zinc-800 px-2 py-1 text-white font-bold">HEDGE locks in curve</span>
+            <span className="text-zinc-600">{"->"}</span>
+            <span className="rounded bg-green-900/50 border border-green-500/30 px-2 py-1 text-green-400 font-bold">you get meme tokens</span>
+          </div>
+          <p className="mt-3 text-center text-xs text-zinc-600">real ERC-20s. show up in ur wallet. 1:1 backed. no funny business.</p>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-orange-400">the slope = how fast u moon</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <div className="rounded border border-orange-500/20 bg-orange-900/10 p-3">
+              <p className="text-sm font-bold text-orange-400">steep slope</p>
+              <p className="text-xs text-zinc-500">price rockets fast. early apes get rekt gains. low supply moon potential.</p>
+            </div>
+            <div className="rounded border border-blue-500/20 bg-blue-900/10 p-3">
+              <p className="text-sm font-bold text-blue-400">shallow slope</p>
+              <p className="text-xs text-zinc-500">price stays cheap longer. more degens can pile in before it pumps.</p>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-zinc-600">
+            launcher picks the slope. once set, it never changes. immutable. no bait-and-switch.
+          </p>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-violet-500/20 bg-violet-600/5 p-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-violet-400">the infinite flywheel</p>
+          <p className="mt-2 text-sm text-zinc-400">
+            every trade feeds the beast. 1% fee + 50 S toll per launch goes straight into the hub pools.
+            more memes = more fees = deeper liquidity = better prices = more degens = more memes.
+            it never stops. the pools only get deeper. forever.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
