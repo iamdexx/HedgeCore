@@ -118,6 +118,20 @@ export default function HubPage() {
     return sPerHedge.toLocaleString(undefined, { maximumSignificantDigits: 4 });
   };
 
+  const marketCap = hubPrice && hubPrice > BigInt(0) && totalSupply
+    ? Number(formatEther((totalSupply * BigInt(1e18)) / hubPrice)).toLocaleString(undefined, { maximumFractionDigits: 2 })
+    : "\u2014";
+
+  const tvl = (() => {
+    let total = 0;
+    if (hubReserveS) total += Number(formatEther(hubReserveS));
+    if (usdcReserveQuote !== undefined) {
+      const usdcInS = Number(usdcReserveQuote) / 1e6 / 0.40;
+      total += usdcInS;
+    }
+    return total > 0 ? total.toLocaleString(undefined, { maximumFractionDigits: 2 }) : "\u2014";
+  })();
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
       <div className="mb-10 text-center sm:mb-14">
@@ -167,13 +181,28 @@ export default function HubPage() {
           icon={<HedgeIcon />}
         />
         <StatCard
-          label="S pool liquidity"
+          label="market cap"
+          value={`${marketCap} S`}
+          sub="supply × price"
+        />
+        <StatCard
+          label="TVL"
+          value={`${tvl} S`}
+          sub="total value locked"
+        />
+        <StatCard
+          label="memes launched"
+          value={spokeCount !== undefined ? spokeCount.toString() : "\u2014"}
+          sub="and counting"
+        />
+        <StatCard
+          label="S pool"
           value={`${fmt(hubReserveS)} S`}
           sub="non-withdrawable"
         />
         {hasUsdcPool && (
           <StatCard
-            label="USDC pool liquidity"
+            label="USDC pool"
             value={
               usdcReserveQuote !== undefined
                 ? `${(Number(usdcReserveQuote) / 1e6).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`
@@ -183,14 +212,9 @@ export default function HubPage() {
           />
         )}
         <StatCard
-          label="memes launched"
-          value={spokeCount !== undefined ? spokeCount.toString() : "\u2014"}
-          sub="and counting"
-        />
-        <StatCard
           label="total supply"
           value={`${fmt(totalSupply)}`}
-          sub="5B max, deflationary"
+          sub="5B max"
           icon={<HedgeIcon />}
         />
         <StatCard
