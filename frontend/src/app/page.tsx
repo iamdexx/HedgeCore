@@ -423,6 +423,24 @@ export default function LandingPage() {
         </div>
         <div className="mt-12 flex items-center justify-center gap-6">
           <a
+            href="https://x.com/sonicpumpmeme"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-bold uppercase tracking-wider text-zinc-600 hover:text-violet-400 transition-colors"
+          >
+            X / Twitter
+          </a>
+          <span className="text-zinc-800">|</span>
+          <a
+            href="https://t.me/sonicpumpmeme"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-bold uppercase tracking-wider text-zinc-600 hover:text-violet-400 transition-colors"
+          >
+            Telegram
+          </a>
+          <span className="text-zinc-800">|</span>
+          <a
             href="https://sonicscan.org/address/0x5cccEbCb0C0af721a6539aFDa1628EeaAF7d6C5c"
             target="_blank"
             rel="noopener noreferrer"
