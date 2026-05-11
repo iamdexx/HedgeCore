@@ -91,6 +91,14 @@ export default function HubPage() {
     args: address ? [address] : undefined,
   }).data as bigint | undefined;
 
+  // Total HEDGE locked in HedgehogCore (hub pool + all spoke reserves)
+  const hedgeLockedInCore = useReadContract({
+    address: CONTRACTS.hedgeToken,
+    abi: HEDGE_TOKEN_ABI,
+    functionName: "balanceOf",
+    args: [CONTRACTS.hedgehogCore],
+  }).data as bigint | undefined;
+
   const usdcAddr = CONTRACTS.usdc;
   const hasUsdcPool = usdcAddr !== "0x0000000000000000000000000000000000000000";
 
@@ -128,6 +136,13 @@ export default function HubPage() {
     if (usdcReserveQuote !== undefined) {
       const usdcInS = Number(usdcReserveQuote) / 1e6 / 0.40;
       total += usdcInS;
+    }
+    // Include all HEDGE locked in core (hub pool + spoke reserves), converted to S value
+    if (hedgeLockedInCore && hubPrice && hubPrice > BigInt(0)) {
+      const hedgeAmount = Number(formatEther(hedgeLockedInCore));
+      const hedgePerS = Number(formatEther(hubPrice));
+      const hedgeValueInS = hedgeAmount / hedgePerS;
+      total += hedgeValueInS;
     }
     return total > 0 ? total.toLocaleString(undefined, { maximumFractionDigits: 2 }) : "\u2014";
   })();
@@ -188,7 +203,7 @@ export default function HubPage() {
         <StatCard
           label="TVL"
           value={`${tvl} S`}
-          sub="total value locked"
+          sub="hub pools + spoke reserves"
         />
         <StatCard
           label="memes launched"
