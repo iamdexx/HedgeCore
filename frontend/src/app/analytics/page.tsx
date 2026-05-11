@@ -23,6 +23,14 @@ interface SpokeState {
 
 const MAX_SUPPLY = BigInt("5000000000000000000000000000"); // 5B HEDGE in wei
 
+function fmtPricePerHedge(hubPrice: bigint | undefined) {
+  if (hubPrice === undefined || hubPrice === BigInt(0)) return "\u2014";
+  const hedgePerS = Number(formatEther(hubPrice));
+  const sPerHedge = 1 / hedgePerS;
+  if (sPerHedge < 0.0001) return sPerHedge.toExponential(2);
+  return sPerHedge.toLocaleString(undefined, { maximumSignificantDigits: 4 });
+}
+
 function fmt(val: bigint | undefined) {
   if (val === undefined) return "\u2014";
   return Number(formatEther(val)).toLocaleString(undefined, {
@@ -337,8 +345,8 @@ export default function AnalyticsPage() {
         </div>
         <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
           <StatBox
-            label="price"
-            value={`${fmt(hubPrice)} S`}
+            label="1 HEDGE"
+            value={`${fmtPricePerHedge(hubPrice)} S`}
             sub="protocol-owned AMM"
             icon={<HedgeIcon size={16} />}
             color="violet"
@@ -346,13 +354,13 @@ export default function AnalyticsPage() {
           <StatBox
             label="market cap"
             value={
-              hubPrice !== undefined && totalSupply !== undefined
+              hubPrice !== undefined && hubPrice > BigInt(0) && totalSupply !== undefined
                 ? `${fmtCompact(
-                    (hubPrice * totalSupply) / BigInt(1e18)
+                    (totalSupply * BigInt(1e18)) / hubPrice
                   )} S`
                 : "\u2014"
             }
-            sub="price × supply"
+            sub="supply × price per HEDGE"
           />
           <StatBox
             label="total supply"

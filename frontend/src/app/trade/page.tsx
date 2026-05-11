@@ -278,6 +278,14 @@ function HubTradePanel() {
         })
       : "\u2014";
 
+  const fmtPricePerHedge = (price: bigint | undefined) => {
+    if (price === undefined || price === BigInt(0)) return "\u2014";
+    const hedgePerS = Number(formatEther(price));
+    const sPerHedge = 1 / hedgePerS;
+    if (sPerHedge < 0.0001) return sPerHedge.toExponential(2);
+    return sPerHedge.toLocaleString(undefined, { maximumSignificantDigits: 4 });
+  };
+
   function handleBuyHedge() {
     if (!amount) return;
     writeContract({
@@ -336,10 +344,10 @@ function HubTradePanel() {
 
       <div className="mb-4 grid grid-cols-2 gap-3 rounded-lg bg-zinc-800/50 p-3 border border-zinc-700">
         <div>
-          <p className="text-xs font-bold uppercase text-zinc-600">hub price</p>
+          <p className="text-xs font-bold uppercase text-zinc-600">1 hedge</p>
           <div className="flex items-center gap-1">
             <HedgeIcon size={14} />
-            <p className="text-sm font-bold text-white">{fmt(hubPrice)} S</p>
+            <p className="text-sm font-bold text-white">{fmtPricePerHedge(hubPrice)} S</p>
           </div>
         </div>
         <div>
