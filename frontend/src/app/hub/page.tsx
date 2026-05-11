@@ -109,6 +109,14 @@ export default function HubPage() {
         })
       : "\u2014";
 
+  const fmtPricePerHedge = (price: bigint | undefined) => {
+    if (price === undefined || price === BigInt(0)) return "\u2014";
+    const hedgePerS = Number(formatEther(price));
+    const sPerHedge = 1 / hedgePerS;
+    if (sPerHedge < 0.0001) return sPerHedge.toExponential(2);
+    return sPerHedge.toLocaleString(undefined, { maximumSignificantDigits: 4 });
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
       <div className="mb-10 text-center sm:mb-14">
@@ -136,8 +144,8 @@ export default function HubPage() {
 
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 sm:gap-4">
         <StatCard
-          label="$hedge price"
-          value={`${fmt(hubPrice)} S`}
+          label="1 hedge ="
+          value={`${fmtPricePerHedge(hubPrice)} S`}
           sub="protocol-owned AMM"
           icon={<HedgeIcon />}
         />

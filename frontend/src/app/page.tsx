@@ -17,6 +17,14 @@ function fmt(val: bigint | undefined) {
   });
 }
 
+function fmtPricePerHedge(hubPrice: bigint | undefined) {
+  if (hubPrice === undefined || hubPrice === BigInt(0)) return "\u2014";
+  const hedgePerS = Number(formatEther(hubPrice));
+  const sPerHedge = 1 / hedgePerS;
+  if (sPerHedge < 0.0001) return sPerHedge.toExponential(2);
+  return sPerHedge.toLocaleString(undefined, { maximumSignificantDigits: 4 });
+}
+
 function fmtCompact(val: bigint | undefined) {
   if (val === undefined) return "\u2014";
   const num = Number(formatEther(val));
@@ -117,10 +125,10 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 overflow-x-auto px-4 py-5 sm:gap-12">
           <div className="shrink-0 text-center">
             <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
-              HEDGE price
+              1 HEDGE
             </p>
             <p className="mt-1 text-lg font-black text-violet-400 sm:text-xl">
-              {fmt(hubPrice)} S
+              {fmtPricePerHedge(hubPrice)} S
             </p>
           </div>
           <div className="shrink-0 text-center">
