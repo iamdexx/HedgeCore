@@ -79,12 +79,12 @@ export default function WhitepaperPage() {
             <li>all trades route through HEDGE: S &rarr; HEDGE &rarr; meme on buy; meme &rarr; HEDGE &rarr; S on sell</li>
             <li><Highlight>1% fee</Highlight> on every hub swap, denominated in HEDGE</li>
             <li>fees get permanently deposited back into hub pools — split across all active pools</li>
-            <li>no LP tokens. no withdrawal mechanism. deposited liquidity is non-retrievable. it only goes up.</li>
+            <li>no LP tokens. no withdrawal mechanism. deposited liquidity is non-retrievable.</li>
           </ol>
         </div>
         <p>at launch, the creator can optionally enable:</p>
         <ul className="list-disc list-inside space-y-1 text-zinc-300">
-          <li><Highlight>referral rewards</Highlight> — referrers earn a % of the meme token on referred buys</li>
+          <li><Highlight>referral rewards</Highlight> — referrers receive a % of the meme token on referred buys</li>
           <li><Highlight>vesting locks</Highlight> — purchased tokens are time-locked to prevent immediate dumps</li>
         </ul>
         <p className="text-white font-semibold">
@@ -121,8 +121,8 @@ where:
 cost to buy from S_old to S_new:
   Cost = (m/2) × (S_new² − S_old²)
 
-revenue from selling:
-  Revenue = (m/2) × (S_old² − S_new²)
+HEDGE returned from selling:
+  Returned = (m/2) × (S_old² − S_new²)
 
 total HEDGE reserve at supply S:
   Reserve = (m/2) × S²`}</Code>
@@ -199,9 +199,9 @@ sellMemeForS()  — meme → HEDGE → S (one tx)`}</Code>
           <li>takes all accumulated HEDGE fees</li>
           <li>splits equally across all hub pools (currently 2)</li>
           <li>deposits each share into the pool&apos;s HEDGE reserve</li>
-          <li>k invariant goes up. pools get deeper. less slippage. more volume. more fees.</li>
+          <li>k invariant increases. pools get deeper. less slippage for traders.</li>
         </ol>
-        <p className="mt-2 text-white font-semibold">flywheel.</p>
+        <p className="mt-2 text-white font-semibold">protocol-owned liquidity cycle.</p>
         <p className="mt-4">
           TWAP deviation check: if spot price deviates &gt;10% from time-weighted average, crank won&apos;t execute. prevents manipulation.
         </p>
@@ -252,7 +252,7 @@ sellMemeForS()  — meme → HEDGE → S (one tx)`}</Code>
           </ul>
         </div>
         <p>
-          protects communities from pump-and-dump. vesting duration is visible on-chain before purchase — no surprises.
+          protects communities from large immediate sell-offs. vesting duration is visible on-chain before purchase — no surprises.
         </p>
       </Section>
 

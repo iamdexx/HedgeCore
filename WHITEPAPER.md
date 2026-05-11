@@ -27,10 +27,10 @@ the protocol runs on a single hub token called **$HEDGE**. memes are priced in H
 4. all trades route through HEDGE: S → HEDGE → meme on buy; meme → HEDGE → S on sell
 5. **1% fee** on every hub swap, denominated in HEDGE
 6. fees get permanently deposited back into hub pools — split across all active pools
-7. no LP tokens. no withdrawal mechanism. deposited liquidity is non-retrievable. it only goes up.
+7. no LP tokens. no withdrawal mechanism. deposited liquidity is non-retrievable.
 
 at launch, the creator can optionally enable:
-- **referral rewards** — referrers earn a % of the meme token on referred buys
+- **referral rewards** — referrers receive a % of the meme token on referred buys
 - **vesting locks** — purchased tokens are time-locked to prevent immediate dumps
 
 feature configuration is set at launch and **cannot be changed after**. buyers know exactly what they're getting into before they buy. rules don't change.
@@ -66,8 +66,8 @@ where:
 cost to buy from S_old to S_new:
   Cost = (m/2) × (S_new² − S_old²)
 
-revenue from selling:
-  Revenue = (m/2) × (S_old² − S_new²)
+HEDGE returned from selling:
+  Returned = (m/2) × (S_old² − S_new²)
 
 total HEDGE reserve at supply S:
   Reserve = (m/2) × S²
@@ -135,9 +135,9 @@ every hub pool swap pays **1% fee** in HEDGE. fees accumulate in a pending buffe
 1. takes all accumulated HEDGE fees
 2. splits equally across all hub pools (currently 2)
 3. deposits each share into the pool's HEDGE reserve
-4. k invariant goes up. pools get deeper. less slippage. more volume. more fees.
+4. k invariant increases. pools get deeper. less slippage for traders.
 
-flywheel.
+protocol-owned liquidity cycle.
 
 TWAP deviation check: if spot price deviates >10% from time-weighted average, crank won't execute. prevents manipulation of the POL deposit price.
 
@@ -178,7 +178,7 @@ when launching a meme token, the creator can enable a time-lock on purchased tok
 - after lock expires, buyer sells normally
 - multiple purchases extend the lock (latest buy resets the timer)
 
-this protects communities from immediate pump-and-dump behavior. the vesting duration is visible on-chain before purchase — buyers know what they're getting into. no surprises.
+this protects communities from large immediate sell-offs. the vesting duration is visible on-chain before purchase — buyers know what they're getting into. no surprises.
 
 ---
 

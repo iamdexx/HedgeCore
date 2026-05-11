@@ -37,7 +37,7 @@ function TxStatus({ isPending, isSuccess, error }: {
   if (isSuccess) {
     return (
       <div className="rounded-lg bg-green-600/10 p-3 text-center text-sm font-bold text-green-400 border border-green-500/20">
-        tx confirmed. lfg
+        tx confirmed
       </div>
     );
   }
@@ -178,7 +178,7 @@ function MemeTradePanel() {
               : "bg-zinc-800 text-zinc-500 hover:text-white border border-zinc-700"
           }`}
         >
-          ape in
+          buy
         </button>
         <button
           onClick={() => setMode("sell")}

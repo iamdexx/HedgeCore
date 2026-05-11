@@ -490,7 +490,7 @@ export default function AnalyticsPage() {
             treasury
           </h2>
           <span className="text-xs font-bold uppercase text-zinc-600">
-            protocol revenue
+            protocol fees
           </span>
         </div>
         <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">

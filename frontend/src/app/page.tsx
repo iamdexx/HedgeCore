@@ -401,10 +401,10 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:py-24 text-center">
         <h2 className="glow-text text-4xl font-black uppercase tracking-tight text-white sm:text-5xl">
-          ready to <span className="text-violet-400">ape in</span>?
+          ready to <span className="text-violet-400">start</span>?
         </h2>
         <p className="mx-auto mt-4 max-w-md text-base text-zinc-500">
-          connect your wallet and start trading. or launch your own meme
+          connect your wallet and swap. or launch your own meme
           on a bonding curve.
         </p>
         <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
