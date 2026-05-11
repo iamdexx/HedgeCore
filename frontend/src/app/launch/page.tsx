@@ -29,7 +29,7 @@ function TxStatus({ isPending, isSuccess, error }: {
   if (isSuccess) {
     return (
       <div className="rounded-lg bg-green-600/10 p-3 text-center text-sm font-bold text-green-400 border border-green-500/20">
-        meme launched. real ERC-20 deployed. go check explore. lfg
+        meme launched. real ERC-20 deployed. go check explore.
       </div>
     );
   }
@@ -267,7 +267,7 @@ export default function LaunchPage() {
                 checked={referralEnabled}
                 onChange={setReferralEnabled}
                 label="Referral Rewards"
-                description="Referrers earn a % of meme tokens when their link gets used"
+                description="Referrers receive a % of meme tokens when their link gets used"
               />
               {referralEnabled && (
                 <div className="ml-7 flex items-center gap-2">
@@ -318,7 +318,7 @@ export default function LaunchPage() {
               className="w-full rounded-lg border-2 border-zinc-700 bg-zinc-800 px-4 py-3 font-mono text-sm text-white placeholder-zinc-600 focus:border-violet-500 focus:outline-none"
             />
             <p className="mt-1 text-xs text-zinc-700">
-              higher slope = steeper pump. default: 1e14.
+              higher slope = steeper price curve. default: 1e14.
             </p>
           </div>
 
