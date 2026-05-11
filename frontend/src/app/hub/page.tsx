@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { formatEther } from "viem";
 import {
   CONTRACTS,
@@ -45,7 +45,8 @@ function HedgeIcon({ size = 20 }: { size?: number }) {
 }
 
 export default function HubPage() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
+  const { writeContract, isPending: isCranking, isSuccess: crankSuccess } = useWriteContract();
 
   const hubReserveS = useReadContract({
     address: CONTRACTS.hedgehogCore,
@@ -142,6 +143,22 @@ export default function HubPage() {
         </div>
       </div>
 
+      {/* wallet balance bar */}
+      {address && (
+        <div className="mb-6 rounded-lg border border-violet-500/20 bg-violet-600/5 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase text-zinc-500">ur bag</p>
+              <div className="mt-1 flex items-center gap-1.5">
+                <HedgeIcon />
+                <p className="text-xl font-black text-white">{fmt(hedgeBalance)}</p>
+                <span className="text-sm text-zinc-500">HEDGE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 sm:gap-4">
         <StatCard
           label="1 hedge ="
@@ -170,9 +187,6 @@ export default function HubPage() {
           value={spokeCount !== undefined ? spokeCount.toString() : "\u2014"}
           sub="and counting"
         />
-      </div>
-
-      <div className="mt-6 grid gap-3 grid-cols-2 lg:grid-cols-3 sm:mt-8 sm:gap-4">
         <StatCard
           label="total supply"
           value={`${fmt(totalSupply)}`}
@@ -185,12 +199,31 @@ export default function HubPage() {
           sub="waiting to get cranked"
           icon={<HedgeIcon />}
         />
-        <StatCard
-          label="ur bag"
-          value={address ? `${fmt(hedgeBalance)}` : "connect wallet ser"}
-          icon={address ? <HedgeIcon /> : undefined}
-        />
       </div>
+
+      {/* crank POL */}
+      <div className="mt-6 rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-bold text-white uppercase">crank the engine</p>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            deposits accumulated fees into both hub pools. anyone can call this.
+          </p>
+        </div>
+        <button
+          onClick={() => writeContract({
+            address: CONTRACTS.hedgehogCore,
+            abi: HEDGEHOG_CORE_ABI,
+            functionName: "crankPOL",
+          })}
+          disabled={!isConnected || isCranking || (accumulatedFees !== undefined && accumulatedFees === BigInt(0))}
+          className="shrink-0 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-bold uppercase text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 border border-green-500/30 transition-colors"
+        >
+          {isCranking ? "cranking..." : crankSuccess ? "cranked!" : "crank"}
+        </button>
+      </div>
+      {accumulatedFees !== undefined && accumulatedFees === BigInt(0) && (
+        <p className="mt-2 text-center text-xs text-zinc-600">no fees to crank rn. trade more.</p>
+      )}
 
       <div className="degen-card mt-10 sm:mt-14 !p-6 sm:!p-8">
         <h2 className="text-xl font-black uppercase tracking-wide text-white">how this works</h2>
