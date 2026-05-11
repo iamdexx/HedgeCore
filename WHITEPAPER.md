@@ -212,7 +212,7 @@ first 100 blocks after a meme launches: only EOAs can trade. no sandwich bots, n
 
 ### minimum supply floor
 
-every meme has a floor of **10,000 tokens** that can never be sold. prevents total drain attacks.
+every meme has a floor of **50,000 tokens** that can never be sold. prevents total drain attacks. this means there's always HEDGE locked in the spoke reserve backing those tokens (reserve = slope/2 × supply²). the floor guarantees permanent two-way liquidity for every meme — there's always a price and always a way to trade.
 
 ### reentrancy protection
 
@@ -240,7 +240,7 @@ graduated memes are composable ERC-20 tokens. holders can pair them on external 
 
 ## sunset mechanism
 
-if a meme sits at minimum supply (10k tokens) for **30 consecutive days** with zero activity, it sunsets:
+if a meme sits at minimum supply (50k tokens) for **30 consecutive days** with zero activity, it sunsets:
 
 - 50% of remaining HEDGE reserve → HEDGE/S hub pool
 - 50% → treasury

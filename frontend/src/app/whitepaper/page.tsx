@@ -295,7 +295,7 @@ sellMemeForS()  — meme → HEDGE → S (one tx)`}</Code>
           </div>
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-1">minimum supply floor</h3>
-            <p>every meme has a floor of <Highlight>10,000 tokens</Highlight> that can never be sold. prevents total drain attacks.</p>
+            <p>every meme has a floor of <Highlight>50,000 tokens</Highlight> that can never be sold. prevents total drain attacks. this means there&apos;s always HEDGE locked in the spoke reserve backing those tokens (reserve = slope/2 × supply²). the floor guarantees permanent two-way liquidity — there&apos;s always a price and always a way to trade.</p>
           </div>
           <div>
             <h3 className="text-sm font-bold text-white uppercase tracking-wide mb-1">reentrancy protection</h3>
@@ -327,7 +327,7 @@ sellMemeForS()  — meme → HEDGE → S (one tx)`}</Code>
       {/* sunset */}
       <Section title="sunset mechanism">
         <p>
-          if a meme sits at minimum supply (10k tokens) for <Highlight>30 consecutive days</Highlight> with zero activity, it sunsets:
+          if a meme sits at minimum supply (50k tokens) for <Highlight>30 consecutive days</Highlight> with zero activity, it sunsets:
         </p>
         <ul className="list-disc list-inside space-y-1 text-zinc-300">
           <li>50% of remaining HEDGE reserve &rarr; HEDGE/S hub pool</li>
