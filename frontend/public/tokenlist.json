@@ -1,0 +1,26 @@
+{
+  "name": "Hedgehog Protocol Token List",
+  "timestamp": "2025-05-10T00:00:00Z",
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 0
+  },
+  "keywords": ["hedgehog", "sonicpump", "meme", "sonic"],
+  "logoURI": "https://sonicpump.meme/logo.png",
+  "tokens": [
+    {
+      "chainId": 146,
+      "address": "0x5cccEbCb0C0af721a6539aFDa1628EeaAF7d6C5c",
+      "name": "Hedgehog",
+      "symbol": "HEDGE",
+      "decimals": 18,
+      "logoURI": "https://sonicpump.meme/hedge-logo.png",
+      "tags": ["governance", "meme-launchpad"],
+      "extensions": {
+        "website": "https://sonicpump.meme",
+        "description": "Hedgehog Protocol native token — powers the meme launchpad on Sonic with protocol-owned liquidity."
+      }
+    }
+  ]
+}
