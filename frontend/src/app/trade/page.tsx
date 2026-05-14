@@ -97,18 +97,19 @@ function TxStatus({ isPending, isSuccess, error }: {
   return null;
 }
 
-function SlippageWarning({ supply, reserve, amount, mode }: {
+function SlippageWarning({ supply, reserve, amount, mode, hubPrice }: {
   supply: bigint | undefined;
   reserve: bigint | undefined;
   amount: string;
   mode: "buy" | "sell";
+  hubPrice?: bigint;
 }) {
   const slippage = useMemo(() => {
     if (!supply || !reserve || !amount || amount === "0") return null;
     try {
       const supplyNum = Number(formatEther(supply));
       const reserveNum = Number(formatEther(reserve));
-      const amountNum = Number(amount);
+      let amountNum = Number(amount);
       if (supplyNum === 0 || reserveNum === 0 || amountNum === 0) return null;
 
       const spotPrice = reserveNum > 0 && supplyNum > 0
@@ -118,7 +119,9 @@ function SlippageWarning({ supply, reserve, amount, mode }: {
 
       let effectivePrice: number;
       if (mode === "buy") {
-        const hedgeIn = amountNum;
+        // Input is S, convert to estimated HEDGE via hub price
+        const hubRate = hubPrice ? Number(formatEther(hubPrice)) : 0;
+        const hedgeIn = hubRate > 0 ? amountNum * hubRate * 0.99 : amountNum;
         const newReserve = reserveNum + hedgeIn;
         const newSupply = Math.sqrt((2 * newReserve) / (spotPrice / supplyNum)) || supplyNum;
         const tokensOut = newSupply - supplyNum;
@@ -137,7 +140,7 @@ function SlippageWarning({ supply, reserve, amount, mode }: {
     } catch {
       return null;
     }
-  }, [supply, reserve, amount, mode]);
+  }, [supply, reserve, amount, mode, hubPrice]);
 
   if (slippage === null || slippage < 0.01) return null;
 
@@ -223,6 +226,13 @@ function SpokeTradePanel({ initialSpokeId }: { initialSpokeId: string }) {
   const hedgeBalance = rawHedgeBalance as bigint | undefined;
 
   const spokeIdBigInt = BigInt(spokeId || "0");
+
+  const { data: rawHubPrice } = useReadContract({
+    address: CONTRACTS.hedgehogCore,
+    abi: HEDGEHOG_CORE_ABI,
+    functionName: "getHubPrice",
+  });
+  const hubPrice = rawHubPrice as bigint | undefined;
 
   const { data: rawInfo } = useReadContract({
     address: CONTRACTS.hedgehogCore,
@@ -496,6 +506,7 @@ function SpokeTradePanel({ initialSpokeId }: { initialSpokeId: string }) {
               reserve={state?.hedgeReserve}
               amount={amount}
               mode={mode}
+              hubPrice={hubPrice}
             />
           )}
 
@@ -544,7 +555,9 @@ function SpotTradePanel() {
   const [amount, setAmount] = useState("");
   const [fromOpen, setFromOpen] = useState(false);
   const [toOpen, setToOpen] = useState(false);
+  const [swapStep, setSwapStep] = useState<1 | 2>(1);
   const { writeContract, isPending, isSuccess, error } = useWriteContract();
+  const { data: nativeBalance } = useBalance({ address });
 
   const { data: spokeCount } = useReadContract({
     address: CONTRACTS.hedgehogCore,
@@ -621,13 +634,27 @@ function SpotTradePanel() {
       ? Number(formatEther(val)).toLocaleString(undefined, { maximumFractionDigits: 4 })
       : "\u2014";
 
-  function handleSpotSwap() {
+  function handleSellStep() {
     if (!amount) return;
     writeContract({
       address: CONTRACTS.comboWrapper,
       abi: COMBO_WRAPPER_ABI,
       functionName: "sellMemeForS",
       args: [fromBigInt, parseEther(amount), BigInt(0)],
+    });
+  }
+
+  function handleBuyStep() {
+    if (!nativeBalance) return;
+    const sBalance = Number(formatEther(nativeBalance.value));
+    if (sBalance <= 0.01) return;
+    const sToSpend = Math.max(sBalance - 0.01, 0);
+    writeContract({
+      address: CONTRACTS.comboWrapper,
+      abi: COMBO_WRAPPER_ABI,
+      functionName: "buyMemeWithS",
+      args: [toBigInt, BigInt(0), "0x0000000000000000000000000000000000000000"],
+      value: parseEther(sToSpend.toFixed(18)),
     });
   }
 
@@ -784,27 +811,67 @@ function SpotTradePanel() {
             <p className="text-center text-sm font-bold text-zinc-600">
               connect wallet to trade anon
             </p>
-          ) : (
+          ) : swapStep === 1 ? (
             <>
-              <p className="text-xs text-zinc-500 text-center">
-                step 1: sell {fromSymbol} for S · step 2: buy {toSymbol} with S
-              </p>
+              <div className="flex gap-2 mb-2">
+                <div className="flex-1 text-center rounded-lg bg-violet-600/20 py-1.5 text-xs font-bold text-violet-400 border border-violet-500/30">
+                  step 1: sell {fromSymbol} → S
+                </div>
+                <div className="flex-1 text-center rounded-lg bg-zinc-800 py-1.5 text-xs font-bold text-zinc-600 border border-zinc-700">
+                  step 2: buy {toSymbol}
+                </div>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleApproveFrom}
                   disabled={isPending || !amount}
                   className="flex-1 rounded-lg bg-zinc-700 py-3 text-sm font-bold uppercase text-white hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-50 border border-zinc-600"
                 >
-                  approve
+                  1. approve
                 </button>
                 <button
-                  onClick={handleSpotSwap}
+                  onClick={() => { handleSellStep(); }}
                   disabled={isPending || !amount}
-                  className="flex-1 rounded-lg bg-violet-600 py-3 text-sm font-bold uppercase text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50 border border-violet-500/30"
+                  className="flex-1 rounded-lg bg-orange-600 py-3 text-sm font-bold uppercase text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50 border border-orange-500/30"
                 >
-                  {isPending ? "confirming..." : "swap"}
+                  {isPending ? "confirming..." : `sell ${fromSymbol} → S`}
                 </button>
               </div>
+              {isSuccess && (
+                <button
+                  onClick={() => setSwapStep(2)}
+                  className="w-full rounded-lg bg-green-600/20 py-2 text-sm font-bold text-green-400 border border-green-500/30 hover:bg-green-600/30 transition-colors"
+                >
+                  step 1 done — proceed to step 2 →
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="flex gap-2 mb-2">
+                <div className="flex-1 text-center rounded-lg bg-green-600/20 py-1.5 text-xs font-bold text-green-400 border border-green-500/30">
+                  step 1: done
+                </div>
+                <div className="flex-1 text-center rounded-lg bg-violet-600/20 py-1.5 text-xs font-bold text-violet-400 border border-violet-500/30">
+                  step 2: buy {toSymbol}
+                </div>
+              </div>
+              <p className="text-xs text-zinc-500 text-center">
+                your S from step 1 is ready — now buy {toSymbol}
+              </p>
+              <button
+                onClick={handleBuyStep}
+                disabled={isPending}
+                className="w-full rounded-lg bg-green-600 py-3 text-sm font-bold uppercase text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 border border-green-500/30"
+              >
+                {isPending ? "confirming..." : `buy ${toSymbol} with S`}
+              </button>
+              <button
+                onClick={() => setSwapStep(1)}
+                className="w-full text-xs text-zinc-500 hover:text-zinc-400 transition-colors py-1"
+              >
+                ← back to step 1
+              </button>
             </>
           )}
 
