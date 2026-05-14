@@ -38,24 +38,24 @@ const TOKEN_LOGOS: Record<string, string> = {
   FT: "https://assets.coingecko.com/coins/images/54059/standard/FT.png",
 };
 
-const TOKEN_ADDRESSES: Record<string, string> = {
-  wS: "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38",
-  USDC: "0x29219dd400f2Bf60E5a23d13Be72B486D4038894",
-  WETH: "0x50c42dEAcD8Fc9773493ED674b675bE577f2634b",
-  USDT: "0x6047828dc181963ba44974801FF68e538Da5eAf9",
-  EURC: "0xe715cbA7B5CCB33790cEBFF1436809D36Cb17E57",
-  "EURC.e": "0xe715cbA7B5CCB33790cEBFF1436809D36Cb17E57",
-  WBTC: "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
-  stS: "0xE5DA20F15420aD15DE0fa650600aFc998bbE3955",
-  SHADOW: "0x3333b97138D4b086720b5aE8A7844b1345a33333",
-  scUSD: "0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE",
-  FT: "0x5DD1A7A369e8273371d2DBf9d83356057088082c",
+const DEXSCREENER_POOLS: Record<string, string> = {
+  wS: "0x324963c267C354c7660Ce8CA3F5f167E05649970",
+  USDC: "0x9053fE060f412ad5677f934F89e07524343eE8E7",
+  WETH: "0xB6d9B069F6B96A507243d501d1a23b3fCCFC85d3",
+  USDT: "0x9053fE060f412ad5677f934F89e07524343eE8E7",
+  EURC: "0x74717286ECb77Bfad051e3Db5Ec6433f2A6A1B9b",
+  "EURC.e": "0x74717286ECb77Bfad051e3Db5Ec6433f2A6A1B9b",
+  WBTC: "0xe62fD4661C85e126744cC335E9bca8Ae3D5d19D1",
+  stS: "0xD760791B29e7894FB827A94Ca433254bb5aFB653",
+  SHADOW: "0xAca297ecC8cbAF15Bd78Cd0757Ee93D6ef82c6b7",
+  scUSD: "0x25ca5451CD5a50AB1d324B5E64F32C0799661891",
+  FT: "0xDdbA4AaCCDA11adbA5eF71343E42D0cA884e70E6",
 };
 
 function getDexScreenerUrl(symbol: string): string | null {
-  const addr = TOKEN_ADDRESSES[symbol];
-  if (!addr) return null;
-  return `https://dexscreener.com/sonic/${addr}?embed=1&trades=0&info=0&chartTheme=dark&theme=dark`;
+  const pool = DEXSCREENER_POOLS[symbol];
+  if (!pool) return null;
+  return `https://dexscreener.com/sonic/${pool}?embed=1&trades=0&info=0&chartTheme=dark&theme=dark`;
 }
 
 function HedgeIcon({ size = 16 }: { size?: number }) {
