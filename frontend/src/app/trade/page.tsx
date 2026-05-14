@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAccount, useWriteContract, useReadContract, useBalance } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import {
@@ -566,13 +567,9 @@ function HubTradePanel() {
   );
 }
 
-export default function TradePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const params = use(searchParams);
-  const spokeParam = typeof params.spoke === "string" ? params.spoke : "0";
+function TradeContent() {
+  const searchParams = useSearchParams();
+  const spokeParam = searchParams.get("spoke") ?? "0";
   const [tab, setTab] = useState<"spoke" | "hub">("spoke");
 
   return (
@@ -613,5 +610,18 @@ export default function TradePage({
 
       {tab === "spoke" ? <SpokeTradePanel initialSpokeId={spokeParam} /> : <HubTradePanel />}
     </div>
+  );
+}
+
+export default function TradePage() {
+  return (
+    <Suspense fallback={
+      <div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
+        <h1 className="glow-text mb-6 text-2xl font-black uppercase text-white sm:mb-8 sm:text-3xl">trade</h1>
+        <div className="animate-pulse degen-card"><div className="h-40 rounded bg-zinc-700" /></div>
+      </div>
+    }>
+      <TradeContent />
+    </Suspense>
   );
 }
