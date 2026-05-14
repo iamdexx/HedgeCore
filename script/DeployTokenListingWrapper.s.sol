@@ -3,50 +3,100 @@ pragma solidity ^0.8.26;
 
 import {Script, console} from "forge-std/Script.sol";
 import {TokenListingWrapper} from "../src/periphery/TokenListingWrapper.sol";
+import {IHedgehogCore} from "../src/interfaces/IHedgehogCore.sol";
 
-/// @notice Deploy the TokenListingWrapper and optionally batch-list blue-chip
-///         Sonic tokens in a single transaction.
+interface IERC20 {
+    function approve(address spender, uint256 amount) external returns (bool);
+    function balanceOf(address owner) external view returns (uint256);
+}
+
+/// @notice Step 1: Deploy wrapper, buy HEDGE, launch 5 blue-chip spokes.
+///         Seeding is skipped here due to EOA_PROTECTION_BLOCKS (100 blocks).
+///         Run SeedBlueChipPools after ~100 blocks to seed.
 contract DeployTokenListingWrapper is Script {
-    // Sonic mainnet addresses
     address constant HEDGEHOG_CORE = 0x985A53B9b82eF766E69FD7DA49E4D53e1A13a27e;
     address constant HEDGE_TOKEN   = 0x5cccEbCb0C0af721a6539aFDa1628EeaAF7d6C5c;
 
-    // Blue-chip Sonic tokens to auto-list
     address constant WS   = 0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38;
     address constant USDC = 0x29219dd400f2Bf60E5a23d13Be72B486D4038894;
     address constant WETH = 0x50c42dEAcD8Fc9773493ED674b675bE577f2634b;
-    address constant USDT = 0x6047828dc181963ba44974801FF68e538Da5eAf9;
-    address constant EURC = 0xe715cbA7B5CCB33790cEBFF1436809D36Cb17E57;
+    address constant USDT = 0x6047828dc181963ba44974801FF68e538dA5eaF9;
+    address constant EURC = 0xe715cbA7B5cCb33790ceBFF1436809d36cb17E57;
+
+    uint256 constant NUM_TOKENS = 5;
 
     function run() external {
         uint256 deployerKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerKey);
 
-        // 1. Deploy wrapper
+        IHedgehogCore core = IHedgehogCore(HEDGEHOG_CORE);
+        IERC20 hedge = IERC20(HEDGE_TOKEN);
+
+        // 1. Buy HEDGE for seeding later (1 S → lots of HEDGE)
+        console.log("Buying HEDGE via hub pool...");
+        core.hubBuyHedge{value: 1 ether}(0);
+        uint256 hedgeBal = hedge.balanceOf(msg.sender);
+        console.log("HEDGE acquired:", hedgeBal);
+
+        // 2. Deploy wrapper
         TokenListingWrapper wrapper = new TokenListingWrapper(HEDGEHOG_CORE, HEDGE_TOKEN);
         console.log("TokenListingWrapper deployed:", address(wrapper));
 
-        // 2. (Optional) Batch-list blue chips
-        //    Uncomment the block below once the deployer has:
-        //    - Enough S for tolls (50 S * 5 = 250 S)
-        //    - Enough HEDGE for seeding (1 HEDGE * 5 = 5 HEDGE)
-        //    - Approved wrapper to spend HEDGE
-        /*
-        address[] memory tokens = new address[](5);
+        // 3. Disable seeding for now (EOA protection prevents contract spokeBuy
+        //    within 100 blocks of spoke creation)
+        wrapper.setSeedAmount(0);
+
+        // 4. Batch-list 5 blue chips — launches spokes without seeding
+        address[] memory tokens = new address[](NUM_TOKENS);
         tokens[0] = WS;
         tokens[1] = USDC;
         tokens[2] = WETH;
         tokens[3] = USDT;
         tokens[4] = EURC;
 
-        // Approve HEDGE spending
-        IERC20(HEDGE_TOKEN).approve(address(wrapper), 5e18);
+        uint256 toll = 50 ether;
+        uint256 totalToll = toll * NUM_TOKENS; // 250 S
+        console.log("Total toll:", totalToll);
+        wrapper.batchListTokens{value: totalToll}(tokens);
 
-        // Batch list (sends 250 S for tolls)
-        wrapper.batchListTokens{value: 250 ether}(tokens);
-        console.log("Batch-listed 5 blue-chip tokens");
-        */
+        console.log("Launched 5 blue-chip spokes!");
+        console.log("Listed token count:", wrapper.listedTokenCount());
+        console.log("Spoke count:", core.getSpokeCount());
 
+        vm.stopBroadcast();
+    }
+}
+
+/// @notice Step 2: Seed the blue-chip pools from EOA after 100 blocks.
+///         Run this ~2 min after DeployTokenListingWrapper.
+contract SeedBlueChipPools is Script {
+    address constant HEDGEHOG_CORE = 0x985A53B9b82eF766E69FD7DA49E4D53e1A13a27e;
+    address constant HEDGE_TOKEN   = 0x5cccEbCb0C0af721a6539aFDa1628EeaAF7d6C5c;
+
+    uint256 constant SEED_AMOUNT = 1e18; // 1 HEDGE per pool
+
+    function run() external {
+        uint256 deployerKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerKey);
+
+        IHedgehogCore core = IHedgehogCore(HEDGEHOG_CORE);
+        IERC20 hedge = IERC20(HEDGE_TOKEN);
+
+        uint256 spokeCount = core.getSpokeCount();
+        console.log("Current spoke count:", spokeCount);
+
+        // Approve core to spend HEDGE
+        uint256 totalSeed = SEED_AMOUNT * spokeCount;
+        hedge.approve(address(core), totalSeed);
+        console.log("Approved HEDGE:", totalSeed);
+
+        // Seed each spoke pool from EOA (bypasses EOA protection)
+        for (uint256 i; i < spokeCount; ++i) {
+            core.spokeBuy(i, SEED_AMOUNT, 0);
+            console.log("Seeded spoke:", i);
+        }
+
+        console.log("All pools seeded!");
         vm.stopBroadcast();
     }
 }

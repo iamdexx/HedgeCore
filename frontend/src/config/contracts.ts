@@ -26,6 +26,7 @@ const ADDRESSES = {
     spokeWrapper: "0x77223fed0c1e1148fA3FB3f315BDB519ff5107C1" as `0x${string}`,
     comboWrapper: "0xc931DD1e5eD9B59568DF50372701374706Bdbc60" as `0x${string}`,
     usdc: "0x29219dd400f2Bf60E5a23d13Be72B486D4038894" as `0x${string}`,
+    tokenListingWrapper: "0x3689FfBB5eaf87d5172CABf5b768E0B991186F67" as `0x${string}`,
   },
 } as const;
 
