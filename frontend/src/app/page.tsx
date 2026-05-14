@@ -432,7 +432,7 @@ export default function LandingPage() {
           </a>
           <span className="text-zinc-800">|</span>
           <a
-            href="https://t.me/sonicpumpmeme"
+            href="https://t.me/sonicpump"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-bold uppercase tracking-wider text-zinc-600 hover:text-violet-400 transition-colors"

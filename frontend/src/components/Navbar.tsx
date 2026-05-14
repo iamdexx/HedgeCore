@@ -69,7 +69,7 @@ export function Navbar() {
               </svg>
             </a>
             <a
-              href="https://t.me/sonicpumpmeme"
+              href="https://t.me/sonicpump"
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-800/50 hover:text-white transition-colors"
@@ -145,7 +145,7 @@ export function Navbar() {
               </svg>
             </a>
             <a
-              href="https://t.me/sonicpumpmeme"
+              href="https://t.me/sonicpump"
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-800/50 hover:text-white transition-colors"
