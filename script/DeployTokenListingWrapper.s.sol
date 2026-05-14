@@ -67,13 +67,22 @@ contract DeployTokenListingWrapper is Script {
     }
 }
 
-/// @notice Step 2: Seed the blue-chip pools from EOA after 100 blocks.
+/// @notice Step 2: Seed ONLY the 5 blue-chip pools from EOA after 100 blocks.
 ///         Run this ~2 min after DeployTokenListingWrapper.
 contract SeedBlueChipPools is Script {
     address constant HEDGEHOG_CORE = 0x985A53B9b82eF766E69FD7DA49E4D53e1A13a27e;
     address constant HEDGE_TOKEN   = 0x5cccEbCb0C0af721a6539aFDa1628EeaAF7d6C5c;
 
     uint256 constant SEED_AMOUNT = 1e18; // 1 HEDGE per pool
+    uint256 constant NUM_BLUE_CHIPS = 5;
+
+    // Spoke IDs assigned by the wrapper (must match deployment order)
+    // Update these after running DeployTokenListingWrapper if spoke IDs differ.
+    uint256 constant SPOKE_WS   = 0;
+    uint256 constant SPOKE_USDC = 1;
+    uint256 constant SPOKE_WETH = 2;
+    uint256 constant SPOKE_USDT = 3;
+    uint256 constant SPOKE_EURC = 4;
 
     function run() external {
         uint256 deployerKey = vm.envUint("PRIVATE_KEY");
@@ -82,21 +91,19 @@ contract SeedBlueChipPools is Script {
         IHedgehogCore core = IHedgehogCore(HEDGEHOG_CORE);
         IERC20 hedge = IERC20(HEDGE_TOKEN);
 
-        uint256 spokeCount = core.getSpokeCount();
-        console.log("Current spoke count:", spokeCount);
-
-        // Approve core to spend HEDGE
-        uint256 totalSeed = SEED_AMOUNT * spokeCount;
+        // Approve core to spend HEDGE (only for 5 blue-chip pools)
+        uint256 totalSeed = SEED_AMOUNT * NUM_BLUE_CHIPS;
         hedge.approve(address(core), totalSeed);
         console.log("Approved HEDGE:", totalSeed);
 
-        // Seed each spoke pool from EOA (bypasses EOA protection)
-        for (uint256 i; i < spokeCount; ++i) {
-            core.spokeBuy(i, SEED_AMOUNT, 0);
-            console.log("Seeded spoke:", i);
+        // Seed only the 5 blue-chip spoke pools from EOA
+        uint256[5] memory spokeIds = [SPOKE_WS, SPOKE_USDC, SPOKE_WETH, SPOKE_USDT, SPOKE_EURC];
+        for (uint256 i; i < NUM_BLUE_CHIPS; ++i) {
+            core.spokeBuy(spokeIds[i], SEED_AMOUNT, 0);
+            console.log("Seeded spoke:", spokeIds[i]);
         }
 
-        console.log("All pools seeded!");
+        console.log("All 5 blue-chip pools seeded!");
         vm.stopBroadcast();
     }
 }
