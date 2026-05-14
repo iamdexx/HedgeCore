@@ -206,7 +206,7 @@ export default function HubPage() {
           sub="hub pools + spoke reserves"
         />
         <StatCard
-          label="memes launched"
+          label="spokes launched"
           value={spokeCount !== undefined ? spokeCount.toString() : "\u2014"}
           sub="and counting"
         />

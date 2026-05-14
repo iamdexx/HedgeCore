@@ -551,7 +551,7 @@ export default function AnalyticsPage() {
             sub={`${equityRate !== undefined ? equityRate.toString() : "\u2014"} bps / launch`}
           />
           <StatBox
-            label="memes launched"
+            label="spokes launched"
             value={spokeCount !== undefined ? spokeCount.toString() : "\u2014"}
             sub="and counting"
             color="violet"
