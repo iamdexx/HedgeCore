@@ -24,6 +24,11 @@ const TOKEN_LOGOS: Record<string, string> = {
   USDT: "https://assets.coingecko.com/coins/images/325/standard/Tether.png",
   "EURC.e": "https://assets.coingecko.com/coins/images/26045/standard/euro-coin.png",
   EURC: "https://assets.coingecko.com/coins/images/26045/standard/euro-coin.png",
+  WBTC: "https://assets.coingecko.com/coins/images/7598/standard/wrapped_bitcoin_wbtc.png",
+  stS: "https://assets.coingecko.com/coins/images/44071/standard/Sonic_Logomark_Dark.png",
+  SHADOW: "https://assets.coingecko.com/coins/images/54213/standard/Shadow.png",
+  scUSD: "https://assets.coingecko.com/coins/images/44071/standard/Sonic_Logomark_Dark.png",
+  FT: "https://assets.coingecko.com/coins/images/54059/standard/FT.png",
 };
 
 function SpokeCard({ spokeId }: { spokeId: number }) {
