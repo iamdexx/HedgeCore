@@ -7,6 +7,7 @@ const ADDRESSES = {
     hedgehogRouter: "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d" as `0x${string}`,
     spokeWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     comboWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    tokenListingWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     usdc: "0x0000000000000000000000000000000000000000" as `0x${string}`,
   },
   // Sonic testnet — update after testnet deployment
@@ -16,6 +17,7 @@ const ADDRESSES = {
     hedgehogRouter: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     spokeWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     comboWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
+    tokenListingWrapper: "0x0000000000000000000000000000000000000000" as `0x${string}`,
     usdc: "0x0000000000000000000000000000000000000000" as `0x${string}`,
   },
   // Sonic mainnet — deployed 2026-05-10
@@ -25,6 +27,7 @@ const ADDRESSES = {
     hedgehogRouter: "0xB09fb21bA329F3318101A9C6C454080b6D2abbB2" as `0x${string}`,
     spokeWrapper: "0x77223fed0c1e1148fA3FB3f315BDB519ff5107C1" as `0x${string}`,
     comboWrapper: "0xc931DD1e5eD9B59568DF50372701374706Bdbc60" as `0x${string}`,
+    tokenListingWrapper: "0x3689FfBB5eaf87d5172CABf5b768E0B991186F67" as `0x${string}`,
     usdc: "0x29219dd400f2Bf60E5a23d13Be72B486D4038894" as `0x${string}`,
   },
 } as const;
@@ -2091,5 +2094,89 @@ export const COMBO_WRAPPER_ABI = [
     "type": "error",
     "name": "TokensLocked",
     "inputs": []
+  }
+] as const;
+
+export const TOKEN_LISTING_WRAPPER_ABI = [
+  {
+    "type": "function",
+    "name": "requestListing",
+    "inputs": [{ "name": "token", "type": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "isListed",
+    "inputs": [{ "name": "", "type": "address" }],
+    "outputs": [{ "name": "", "type": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "listingRequests",
+    "inputs": [{ "name": "", "type": "address" }],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "tokenSpokeId",
+    "inputs": [{ "name": "", "type": "address" }],
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "listedTokenCount",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "listedTokens",
+    "inputs": [{ "name": "", "type": "uint256" }],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "approveListing",
+    "inputs": [{ "name": "token", "type": "address" }],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "rejectListing",
+    "inputs": [{ "name": "token", "type": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "ListingRequested",
+    "inputs": [
+      { "name": "token", "type": "address", "indexed": true },
+      { "name": "requester", "type": "address", "indexed": true }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "TokenListed",
+    "inputs": [
+      { "name": "token", "type": "address", "indexed": true },
+      { "name": "spokeId", "type": "uint256", "indexed": true },
+      { "name": "name", "type": "string", "indexed": false },
+      { "name": "symbol", "type": "string", "indexed": false }
+    ]
   }
 ] as const;
