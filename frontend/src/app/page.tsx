@@ -99,7 +99,7 @@ export default function LandingPage() {
             sonic<span className="text-violet-400">pump</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-zinc-400 sm:text-xl">
-            the meme launchpad built on bonding curves.
+            the token launchpad built on bonding curves.
             launch tokens backed by{" "}
             <span className="font-bold text-violet-400">$HEDGE</span> on Sonic.
           </p>
@@ -114,7 +114,7 @@ export default function LandingPage() {
               href="/launch"
               className="rounded-xl border-2 border-zinc-600 bg-zinc-900/50 px-8 py-4 text-lg font-black uppercase tracking-wide text-zinc-300 transition-all hover:border-violet-500/50 hover:text-white"
             >
-              launch a meme
+              launch a spoke
             </Link>
           </div>
         </div>
@@ -161,7 +161,7 @@ export default function LandingPage() {
           </div>
           <div className="shrink-0 text-center">
             <p className="text-xs font-bold uppercase tracking-wider text-zinc-600">
-              memes launched
+              spokes launched
             </p>
             <p className="mt-1 text-lg font-black text-white sm:text-xl">
               {spokeCount !== undefined ? spokeCount.toString() : "\u2014"}
@@ -176,7 +176,7 @@ export default function LandingPage() {
           how it <span className="text-violet-400">works</span>
         </h2>
         <p className="mx-auto mt-3 max-w-lg text-center text-sm text-zinc-500">
-          three steps. no VC. no pre-sale. just pure on-chain meme economics.
+          three steps. no VC. no pre-sale. just pure on-chain token economics.
         </p>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
@@ -185,11 +185,11 @@ export default function LandingPage() {
               1
             </div>
             <h3 className="text-lg font-black uppercase text-white">
-              launch a meme
+              launch a spoke
             </h3>
             <p className="mt-2 text-sm text-zinc-500">
               pay the toll in $S. half buys $HEDGE for the treasury, half
-              gets deposited into protocol-owned liquidity. your meme token
+              gets deposited into protocol-owned liquidity. your spoke token
               goes live instantly.
             </p>
           </div>
@@ -201,7 +201,7 @@ export default function LandingPage() {
               trade it
             </h3>
             <p className="mt-2 text-sm text-zinc-500">
-              every meme trades on its own bonding curve backed by $HEDGE. 1%
+              every spoke trades on its own bonding curve backed by $HEDGE. 1%
               fee on every trade accumulates and gets cranked into permanent
               protocol-owned liquidity.
             </p>
@@ -229,7 +229,7 @@ export default function LandingPage() {
             hub & <span className="text-green-400">spoke</span>
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-sm text-zinc-500">
-            $HEDGE is the center of everything. every meme pairs against it.
+            $HEDGE is the center of everything. every spoke pairs against it.
           </p>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
@@ -274,14 +274,14 @@ export default function LandingPage() {
                 </h3>
               </div>
               <p className="text-sm text-zinc-500">
-                every meme token lives on its own bonding curve priced in
-                $HEDGE. buy memes with S or USDC through the router &mdash; it
+                every spoke token lives on its own bonding curve priced in
+                $HEDGE. buy tokens with S or USDC through the router &mdash; it
                 swaps to HEDGE under the hood. each spoke is an independent
                 market, but they all feed back into the hub.
               </p>
               <div className="mt-4 rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/50">
                 <p className="text-xs font-bold uppercase text-zinc-600">
-                  memes live
+                  spokes live
                 </p>
                 <p className="mt-1 text-sm font-black text-violet-400">
                   {spokeCount !== undefined ? spokeCount.toString() : "\u2014"}
@@ -321,7 +321,7 @@ export default function LandingPage() {
               bonding curves
             </h3>
             <p className="mt-2 text-xs text-zinc-500">
-              every meme trades on a quadratic bonding curve. price goes up
+              every spoke trades on a quadratic bonding curve. price goes up
               with supply, down when supply shrinks. no order books. pure math.
             </p>
           </div>
@@ -404,7 +404,7 @@ export default function LandingPage() {
           ready to <span className="text-violet-400">start</span>?
         </h2>
         <p className="mx-auto mt-4 max-w-md text-base text-zinc-500">
-          connect your wallet and swap. or launch your own meme
+          connect your wallet and swap. or launch your own spoke
           on a bonding curve.
         </p>
         <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
