@@ -63,7 +63,7 @@ function GraduatedCard({ spokeId }: { spokeId: number }) {
   const info = rawInfo as
     | [string, string, string, bigint, bigint, bigint, boolean, `0x${string}`]
     | undefined;
-  const name = info?.[0] || `meme #${spokeId}`;
+  const name = info?.[0] || `Spoke #${spokeId}`;
   const symbol = info?.[1] || "???";
 
   if (!state?.graduated) return null;
@@ -155,7 +155,7 @@ function RisingCard({ spokeId }: { spokeId: number }) {
   const info = rawInfo as
     | [string, string, string, bigint, bigint, bigint, boolean, `0x${string}`]
     | undefined;
-  const name = info?.[0] || `meme #${spokeId}`;
+  const name = info?.[0] || `Spoke #${spokeId}`;
   const symbol = info?.[1] || "???";
 
   if (!state || state.graduated) return null;
@@ -236,7 +236,7 @@ export default function GraduatePage() {
           pro <span className="text-green-400">dex</span>
         </h1>
         <p className="mt-2 text-zinc-500">
-          memes that hit 50k HEDGE in reserves graduate to the big leagues.
+          spokes that hit 50k HEDGE in reserves graduate to the big leagues.
           these tokens proved they have diamond hands behind them.
         </p>
       </div>
@@ -270,7 +270,7 @@ export default function GraduatePage() {
           <div className="degen-empty flex flex-col items-center justify-center py-16">
             <p className="text-lg font-bold text-zinc-500">no graduates yet</p>
             <p className="mt-1 text-sm text-zinc-600">
-              first meme to hit 50k HEDGE gets the crown
+              first spoke to hit 50k HEDGE gets the crown
             </p>
           </div>
         ) : (
@@ -282,7 +282,7 @@ export default function GraduatePage() {
         )}
       </div>
 
-      {/* rising section — memes approaching graduation */}
+      {/* rising section — spokes approaching graduation */}
       {count > 0 && (
         <div>
           <div className="mb-4 flex items-center gap-2">
@@ -308,19 +308,19 @@ export default function GraduatePage() {
           <div>
             <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-violet-600/30 text-xs font-black text-violet-400">1</span>
             <p className="mt-2 text-sm text-zinc-400">
-              a meme accumulates HEDGE in its reserve through buys on the bonding curve
+              a spoke accumulates HEDGE in its reserve through buys on the bonding curve
             </p>
           </div>
           <div>
             <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-yellow-600/30 text-xs font-black text-yellow-400">2</span>
             <p className="mt-2 text-sm text-zinc-400">
-              when the reserve hits 50,000 HEDGE, the meme graduates automatically. no votes, no governance. pure market signal.
+              when the reserve hits 50,000 HEDGE, the spoke graduates automatically. no votes, no governance. pure market signal.
             </p>
           </div>
           <div>
             <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-green-600/30 text-xs font-black text-green-400">3</span>
             <p className="mt-2 text-sm text-zinc-400">
-              graduated memes join the pro dex — proof that the community put their HEDGE where their mouth is
+              graduated spokes join the pro dex — proof that the community put their HEDGE where their mouth is
             </p>
           </div>
         </div>

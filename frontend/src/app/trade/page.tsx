@@ -51,7 +51,7 @@ function TxStatus({ isPending, isSuccess, error }: {
   return null;
 }
 
-function MemeTradePanel() {
+function SpokeTradePanel() {
   const { address, isConnected } = useAccount();
   const [spokeId, setSpokeId] = useState("0");
   const [amount, setAmount] = useState("");
@@ -195,7 +195,7 @@ function MemeTradePanel() {
       <div className="space-y-4">
         <div>
           <label className="mb-1.5 block text-xs font-bold uppercase text-zinc-500">
-            meme id
+            spoke id
           </label>
           <input
             type="number"
@@ -461,7 +461,7 @@ function HubTradePanel() {
 }
 
 export default function TradePage() {
-  const [tab, setTab] = useState<"meme" | "hub">("meme");
+  const [tab, setTab] = useState<"spoke" | "hub">("spoke");
 
   return (
     <div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
@@ -469,14 +469,14 @@ export default function TradePage() {
 
       <div className="mb-5 flex gap-2 sm:mb-6">
         <button
-          onClick={() => setTab("meme")}
+          onClick={() => setTab("spoke")}
           className={`rounded-lg px-4 py-2 text-sm font-bold uppercase transition-colors ${
-            tab === "meme"
+            tab === "spoke"
               ? "bg-zinc-700 text-white border border-zinc-600"
               : "text-zinc-500 hover:text-white"
           }`}
         >
-          meme tokens
+          spoke tokens
         </button>
         <button
           onClick={() => setTab("hub")}
@@ -491,7 +491,7 @@ export default function TradePage() {
         </button>
       </div>
 
-      {tab === "meme" ? <MemeTradePanel /> : <HubTradePanel />}
+      {tab === "spoke" ? <SpokeTradePanel /> : <HubTradePanel />}
     </div>
   );
 }

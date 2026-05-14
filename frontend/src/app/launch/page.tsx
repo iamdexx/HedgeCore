@@ -22,14 +22,14 @@ function TxStatus({ isPending, isSuccess, error }: {
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
-        deploying ur meme...
+        deploying ur spoke...
       </div>
     );
   }
   if (isSuccess) {
     return (
       <div className="rounded-lg bg-green-600/10 p-3 text-center text-sm font-bold text-green-400 border border-green-500/20">
-        meme launched. real ERC-20 deployed. go check explore.
+        spoke launched. real ERC-20 deployed. go check explore.
       </div>
     );
   }
@@ -151,7 +151,7 @@ export default function LaunchPage() {
   return (
     <div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
       <h1 className="glow-text mb-2 text-2xl font-black uppercase text-white sm:text-3xl">
-        launch a meme
+        launch a spoke
       </h1>
       <p className="mb-6 text-zinc-500 sm:mb-8">
         create a real ERC-20 token backed by{" "}
@@ -267,7 +267,7 @@ export default function LaunchPage() {
                 checked={referralEnabled}
                 onChange={setReferralEnabled}
                 label="Referral Rewards"
-                description="Referrers receive a % of meme tokens when their link gets used"
+                description="Referrers receive a % of spoke tokens when their link gets used"
               />
               {referralEnabled && (
                 <div className="ml-7 flex items-center gap-2">
@@ -363,7 +363,7 @@ export default function LaunchPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-violet-600/30 text-xs font-black text-violet-400 border border-violet-500/20">4</span>
-            ur meme starts on a bonding curve. price goes up with buys
+            ur spoke starts on a bonding curve. price goes up with buys
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-violet-600/30 text-xs font-black text-violet-400 border border-violet-500/20">5</span>
