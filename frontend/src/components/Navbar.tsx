@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/trade", label: "trade" },
   { href: "/explore", label: "explore" },
   { href: "/launch", label: "launch" },
+  { href: "/list", label: "list token" },
   { href: "/graduate", label: "pro dex" },
   { href: "/analytics", label: "protocol" },
   { href: "/whitepaper", label: "docs" },
